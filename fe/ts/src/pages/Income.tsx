@@ -11,7 +11,7 @@ const IncomeText = styled.div`
 
 const Income: React.FunctionComponent = () => {
     return (
-        <IncomeText>Team</IncomeText>
+        <IncomeText>Income</IncomeText>
     )
 }
 

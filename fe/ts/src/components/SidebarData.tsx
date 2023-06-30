@@ -3,12 +3,12 @@ import * as FaIcons from 'react-icons/fa'
 export const SidebarData = [
     {
         title: 'Current Net Worth',
-        path: '/',
+        path: '/home',
         icon: <FaIcons.FaCoins />
     },
     {
         title: 'Home',
-        path: '/',
+        path: '/home',
         icon: <FaIcons.FaHome />
     },
     {
@@ -37,7 +37,7 @@ export const SidebarData = [
     },
     {
         title: 'Exit',
-        path: '',
+        path: '/',
         icon: <FaIcons.FaDoorClosed />
     }
 ]

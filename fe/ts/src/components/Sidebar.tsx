@@ -4,7 +4,7 @@ import * as FaIcons from 'react-icons/fa'
 import { SidebarData } from './SidebarData'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Currency } from '../utilities/Currency'
+import { Currency, convertCurrency } from '../utilities/Currency'
 
 const Navbar = styled.div`
     display: flex;
@@ -79,7 +79,7 @@ const HeaderSidebarLink = styled(Link)`
 const NavbarRight = styled.div`
   display: flex;
   align-items: center;
-  margin-left: 80%;
+  margin-left: auto;
 `;
 
 const CurrencyDropdown = styled.select`
@@ -108,16 +108,16 @@ const Sidebar: React.FunctionComponent = () => {
     }
 
     const [selectedCurrency, setSelectedCurrency] = useState('EUR');
-    const netWorth = 1000000;
+    const [netWorth, setNetWorth] = useState(100000);
 
     const changeCurrency = (currency: string) => {
         const oldCurrency = selectedCurrency;
 
         // Convert from old to new currency the amount
-        // const newAmount = convertCurrency(netWorth, oldCurrency, currency);
-        // setNetWorth(newAmount);
+        const newAmount = convertCurrency(netWorth, oldCurrency, currency);
 
         // Update the currency
+        setNetWorth(newAmount);
         setSelectedCurrency(currency);
     };
 
@@ -138,6 +138,9 @@ const Sidebar: React.FunctionComponent = () => {
                     <option value="EUR" selected>EUR</option>
                     <option value="USD">USD</option>
                 </CurrencyDropdown>
+
+                <NavBarItem />
+
                 </NavbarRight>
             </Navbar>
 
