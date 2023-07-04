@@ -1,6 +1,6 @@
 export const CURRENCIES = {
-    USD: "$",
     EUR: "€",
+    USD: "$",
     CHF: ".-",
     GBP: "£",
 };

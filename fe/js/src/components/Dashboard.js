@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { Alert } from "react-bootstrap";
+
+import "./Dashboard.css";
 
 import UserService from "../services/user.service";
 
+const buildDashboard = (userData) => {
+  // Structure the dashboard here
+  return (
+    <>
+      <h3>Welcome, {userData.username}!</h3>
+    </>
+  );
+};
+
 const Dashboard = () => {
-  const [content, setContent] = useState("");
+  const [error, setError] = useState(null);
+  const userData = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -15,23 +28,25 @@ const Dashboard = () => {
         dispatch({ type: 'SET_USER_STATE', payload: {'networth' : data.amountEUR, } });
       },
       (error) => {
-        const _content =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-        setContent(_content);
+          setError(
+            (error.response && error.response.data && error.response.data.message) ||
+              error.message ||
+              error.toString()
+          );
       }
     );
   }, [dispatch]);
 
   return (
-    <div className="container">
-      <header className="jumbotron">
-        <h3>{content}</h3>
-      </header>
-    </div>
+    <div className="container centered">
+      {error ? (
+        <Alert variant="danger">{error}. Try to refresh the page...</Alert>
+      ) : (
+        <>
+          {userData ? buildDashboard(userData) : <div className="spinner"></div>}
+        </>
+      )}
+  </div>
   );
 };
 

@@ -1,15 +1,9 @@
 package com.pfm.sbjwt.controllers;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
 import com.pfm.sbjwt.components.ExchangeRateUpdater;
 import com.pfm.sbjwt.models.ExchangeRate;
-import com.pfm.sbjwt.payload.request.ContentRequest;
-import com.pfm.sbjwt.payload.response.MessageResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
-import com.pfm.sbjwt.repository.ExchangeRateRepository;
 import com.pfm.sbjwt.services.ExchangeRateService;
-import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

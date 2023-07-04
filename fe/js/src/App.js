@@ -15,6 +15,7 @@ import { clearMessage } from "./actions/message";
 
 const App = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
+  const { user: userData } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   let location = useLocation();
@@ -27,7 +28,7 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && <Sidebar />}
+      {currentUser && userData && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>
