@@ -14,7 +14,7 @@ public class Role {
   private ERole name;
 
   public Role() {
-    // public empty constructor
+    // Public empty constructor
   }
 
   public Integer getId() {
@@ -23,13 +23,5 @@ public class Role {
 
   public ERole getName() {
     return name;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public void setName(ERole name) {
-    this.name = name;
   }
 }

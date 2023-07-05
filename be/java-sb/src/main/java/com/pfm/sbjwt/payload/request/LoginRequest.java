@@ -3,28 +3,21 @@ package com.pfm.sbjwt.payload.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class LoginRequest {
-  @NotBlank
-  @Size(min = 3, max = 20)
-  private String username;
+public record LoginRequest(
+    @NotBlank @Size(min = 3, max = 20) String username,
+    @NotBlank @Size(min = 6, max = 40) String password) {
+  public LoginRequest(String username, String password) {
+    this.username = username;
+    this.password = password;
+  }
 
-  @NotBlank
-  @Size(min = 6, max = 40)
-  private String password;
-
-  public String getUsername() {
+  @Override
+  public String username() {
     return username;
   }
 
-  public String getPassword() {
+  @Override
+  public String password() {
     return password;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 }

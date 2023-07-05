@@ -19,7 +19,9 @@ public class ExchangeRate {
   @NotBlank
   @Size(max = 3)
   private String currencyCode;
+
   private Float rate;
+
   private LocalDateTime timestamp;
 
   public ExchangeRate() {
@@ -32,34 +34,19 @@ public class ExchangeRate {
     this.timestamp = timestamp;
   }
 
-  public String getCurrencyCode() {
-    return currencyCode;
-  }
-  public Float getRate() {
-    return rate;
-  }
-
   public Long getId() {
     return id;
   }
 
+  public String getCurrencyCode() {
+    return currencyCode;
+  }
+
+  public Float getRate() {
+    return rate;
+  }
+
   public LocalDateTime getTimestamp() {
     return timestamp;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public void setCurrencyCode(String currencyCode) {
-    this.currencyCode = currencyCode;
-  }
-
-  public void setRate(Float rate) {
-    this.rate = rate;
-  }
-
-  public void setTimestamp(LocalDateTime timestamp) {
-    this.timestamp = timestamp;
   }
 }
