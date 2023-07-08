@@ -46,11 +46,13 @@ public class Asset {
   }
 
   public Asset(
+      User user,
       LocalDate purchaseDate,
       String currencyCode,
       String category,
       String description,
       BigDecimal purchasedAmount) {
+    this.user = user;
     this.purchaseDate = purchaseDate;
     this.currencyCode = currencyCode;
     this.category = category;

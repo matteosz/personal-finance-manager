@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -10,7 +10,9 @@ import Register from "./components/Register";
 import Sidebar from "./components/Sidebar";
 import Profile from "./components/Profile";
 import Dashboard from "./components/Dashboard";
+import EventBus from "./common/EventBus";
 
+import { logout } from "./actions/auth";
 import { clearMessage } from "./actions/message";
 
 const App = () => {
@@ -20,11 +22,24 @@ const App = () => {
 
   let location = useLocation();
 
+  const logOut = useCallback(() => {
+    dispatch(logout());
+    <Navigate to="/login" replace="true"/>;
+  }, [dispatch]);
+
   useEffect(() => {
     if (["/login", "/register"].includes(location.pathname)) {
       dispatch(clearMessage()); // clear message when changing location
     }
-  }, [dispatch, location]);
+
+    EventBus.on("logout", () => {
+      logOut();
+    });
+
+    return () => {
+      EventBus.remove("logout");
+    };
+  }, [dispatch, location, logOut]);
 
   return (
     <div>

@@ -50,12 +50,14 @@ public class Expense {
   }
 
   public Expense(
+      User user,
       LocalDate date,
       String currencyCode,
       String category,
       String subCategory,
       String description,
       BigDecimal amount) {
+    this.user = user;
     this.date = date;
     this.currencyCode = currencyCode;
     this.category = category;

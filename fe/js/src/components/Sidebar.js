@@ -108,7 +108,7 @@ const Sidebar = () => {
     const [close, setClose] = useState(false)
     const showSidebar = () => setClose(!close)
 
-    const rates = useSelector((state) => state.rates.rates);
+    const rates = useSelector((state) => state.user.rates);
     const user = useSelector((state) => state.user.user);
 
     const [selectedCurrency, setSelectedCurrency] = useState('EUR');
@@ -133,7 +133,7 @@ const Sidebar = () => {
 
     const logOut = useCallback(() => {
         dispatch(logout());
-      }, [dispatch]);
+    }, [dispatch]);
 
     return (
         <>

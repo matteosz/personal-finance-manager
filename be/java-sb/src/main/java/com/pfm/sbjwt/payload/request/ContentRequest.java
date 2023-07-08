@@ -1,15 +1,14 @@
 package com.pfm.sbjwt.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
-public record ContentRequest(@NotBlank @Size(min = 3, max = 20) String username) {
-  public ContentRequest(String username) {
-    this.username = username;
+public record ContentRequest(@NotBlank String jwtToken) {
+  public ContentRequest(String jwtToken) {
+    this.jwtToken = jwtToken;
   }
 
   @Override
-  public String username() {
-    return username;
+  public String jwtToken() {
+    return jwtToken;
   }
 }

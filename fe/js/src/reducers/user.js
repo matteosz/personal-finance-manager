@@ -4,6 +4,13 @@ const userReducer = (state = {}, action) => {
         return {
             ...state,
             user: action.payload,
+            rates: null
+        };
+        case 'SET_RATES':
+        return {
+            ...state,
+            user: null,
+            rates: action.payload,
         };
         default:
         return state;

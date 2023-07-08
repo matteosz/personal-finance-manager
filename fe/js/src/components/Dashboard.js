@@ -5,6 +5,7 @@ import { Alert } from "react-bootstrap";
 import "./Dashboard.css";
 
 import UserService from "../services/user.service";
+import EventBus from "../common/EventBus";
 
 const buildDashboard = (userData) => {
   // Structure the dashboard here
@@ -33,6 +34,9 @@ const Dashboard = () => {
               error.message ||
               error.toString()
           );
+          if (error.response && error.response.status === 401) {
+            EventBus.dispatch("logout");
+          }
       }
     );
   }, [dispatch]);
