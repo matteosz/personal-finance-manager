@@ -4,6 +4,7 @@ import { Alert } from "react-bootstrap";
 
 import "./Dashboard.css";
 
+import EventBus from "../common/EventBus";
 import UserService from "../services/user.service";
 
 const buildDashboard = (userData) => {
@@ -24,8 +25,13 @@ const Dashboard = () => {
     UserService.getUserBoard().then(
       (response) => {
         const data = response.data;
-        dispatch({ type: 'SET_RATES', payload: data.lastRates });
-        dispatch({ type: 'SET_USER_STATE', payload: {'networth' : data.amountEUR, } });
+        dispatch({ type: 'SET_USER_CONTENT', 
+          payload: {'rates': data.lastRates, 
+                    'networth': data.netWorth,
+                    'expenses': data.expenses,
+                    'income': data.income,
+                    'assets': data.assets,
+                  } });
       },
       (error) => {
           setError(
@@ -33,6 +39,9 @@ const Dashboard = () => {
               error.message ||
               error.toString()
           );
+          if (error.response && error.response.status === 401) {
+            EventBus.dispatch("logout");
+          }
       }
     );
   }, [dispatch]);

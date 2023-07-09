@@ -108,23 +108,21 @@ const Sidebar = () => {
     const [close, setClose] = useState(false)
     const showSidebar = () => setClose(!close)
 
-    const rates = useSelector((state) => state.rates.rates);
     const user = useSelector((state) => state.user.user);
 
     const [selectedCurrency, setSelectedCurrency] = useState('EUR');
     const [netWorth, setNetWorth] = useState(0);
 
     useEffect(() => {
-        if (user) {
-          // Calculate and update the net worth based on the user data
-          const updatedNetWorth = user.networth;
-          setNetWorth(updatedNetWorth);
+        if (user && user.networth) {
+            // Calculate and update the net worth based on the user data
+            setNetWorth(user.networth);
         }
-      }, [user]);
+    }, [user]);
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
-        const newAmount = convertCurrency(rates, user.networth, currency);
+        const newAmount = convertCurrency(user.rates, user.networth, currency);
 
         // Update the currency
         setNetWorth(newAmount);

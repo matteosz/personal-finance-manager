@@ -21,7 +21,6 @@ export const convertCurrency = (exchangeRates, amount, to) => {
 export const Currency = (props) => {
     const { value, code } = props;
     const currencySymbol = CURRENCIES[code];
-
     return (
         <span>
             {value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")}{currencySymbol}
