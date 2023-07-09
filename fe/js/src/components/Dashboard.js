@@ -6,6 +6,7 @@ import "./Dashboard.css";
 
 import EventBus from "../common/EventBus";
 import UserService from "../services/user.service";
+import { setUserContent } from "../actions/user";
 
 const buildDashboard = (userData) => {
   // Structure the dashboard here
@@ -18,20 +19,13 @@ const buildDashboard = (userData) => {
 
 const Dashboard = () => {
   const [error, setError] = useState(null);
-  const userData = useSelector((state) => state.user.user);
+  const {user: userData} = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
     UserService.getUserBoard().then(
       (response) => {
-        const data = response.data;
-        dispatch({ type: 'SET_USER_CONTENT', 
-          payload: {'rates': data.lastRates, 
-                    'networth': data.netWorth,
-                    'expenses': data.expenses,
-                    'income': data.income,
-                    'assets': data.assets,
-                  } });
+        dispatch(setUserContent(response.data));
       },
       (error) => {
           setError(

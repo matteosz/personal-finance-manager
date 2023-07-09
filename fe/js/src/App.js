@@ -6,10 +6,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import Login from "./components/Login";
+import Setup from "./components/Setup";
 import Register from "./components/Register";
 import Sidebar from "./components/Sidebar";
-import Profile from "./components/Profile";
 import Dashboard from "./components/Dashboard";
+import Expenses from "./components/Expenses";
+import Income from "./components/Income";
+import Assets from "./components/Assets";
+
 import EventBus from "./common/EventBus";
 
 import { logout } from "./actions/auth";
@@ -43,17 +47,27 @@ const App = () => {
     };
   }, [dispatch, location, logOut]);
 
+  const setupOrElement = (element) => {
+    if (currentUser && userData && userData.netWorth == null) {
+      return <Setup />;
+    } else {
+      return element;
+    }
+  };
+
   return (
     <div>
-      {currentUser && userData && <Sidebar />}
+      {currentUser && userData && userData.netWorth != null && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/home" element={<Dashboard />} />
+          <Route path="/home" element={setupOrElement(<Dashboard />)} />
+          <Route path="/expenses" element={setupOrElement(<Expenses />)} />
+          <Route path="/income" element={setupOrElement(<Income />)} />
+          <Route path="/assets" element={setupOrElement(<Assets />)} />
         </Routes>
       </div>
 

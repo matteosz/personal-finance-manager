@@ -22,6 +22,7 @@ public class NetWorth {
   @JoinColumn(name = "user_id")
   private User user;
 
+  // In EUR
   @Column(nullable = false)
   private BigDecimal value;
 

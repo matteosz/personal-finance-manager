@@ -6,7 +6,7 @@ import * as FaIcons from 'react-icons/fa'
 import styled from 'styled-components'
 
 import { SidebarData } from './SidebarData'
-import { Currency, convertCurrency, CURRENCIES } from '../utils/rates'
+import { Currency, convertCurrency, CURRENCIES } from '../objects/Currency'
 import { logout } from "../actions/auth";
 
 const Navbar = styled.div`
@@ -108,21 +108,21 @@ const Sidebar = () => {
     const [close, setClose] = useState(false)
     const showSidebar = () => setClose(!close)
 
-    const user = useSelector((state) => state.user.user);
+    const {user: userData} = useSelector((state) => state.user);
 
     const [selectedCurrency, setSelectedCurrency] = useState('EUR');
     const [netWorth, setNetWorth] = useState(0);
 
     useEffect(() => {
-        if (user && user.networth) {
+        if (userData && userData.netWorth) {
             // Calculate and update the net worth based on the user data
-            setNetWorth(user.networth);
+            setNetWorth(userData.netWorth);
         }
-    }, [user]);
+    }, [userData]);
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
-        const newAmount = convertCurrency(user.rates, user.networth, currency);
+        const newAmount = convertCurrency(userData.lastRates, userData.netWorth, "EUR", currency);
 
         // Update the currency
         setNetWorth(newAmount);
@@ -175,7 +175,7 @@ const Sidebar = () => {
                                 {item.icon}
                                 <span style={{marginLeft: '16px'}}>{item.title}
                                 <br></br>
-                                {Currency({value: netWorth, code: selectedCurrency})}</span>
+                                {Currency({value: netWorth.value, code: selectedCurrency})}</span>
                             </MenuNotPageItems>
                         )
                     }

@@ -55,6 +55,13 @@ public class TestController {
     return ResponseEntity.ok(new UserResponse(rates, user.get()));
   }
 
+  @PostMapping("/user/setup")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userSetup(HttpServletRequest request) {
+    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
+    return null;
+  }
+
   @PostMapping("/user/expense/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userExpense() {

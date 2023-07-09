@@ -5,14 +5,14 @@ export const CURRENCIES = {
     GBP: "£",
 };
 
-export const convertCurrency = (exchangeRates, amount, to) => {
+export const convertCurrency = (exchangeRates, amount, from, to) => {
     // Check if the rates are loaded
     if (exchangeRates === null) {
         throw new Error("Exchange rates not loaded");
     }
 
-    // Convert the amount (amount is intended in EUR)
-    const fromRate = exchangeRates['EUR'];
+    // Convert the amount
+    const fromRate = exchangeRates[from];
     const toRate = exchangeRates[to];
 
     return amount / fromRate * toRate;
