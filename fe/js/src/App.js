@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
@@ -18,10 +18,13 @@ import EventBus from "./common/EventBus";
 
 import { logout } from "./actions/auth";
 import { clearMessage } from "./actions/message";
+import { getUsercontent } from "./actions/user";
 
 const App = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
   const { user: userData } = useSelector((state) => state.user);
+
+  const [userContentLoaded, setUserContentLoaded] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -39,16 +42,26 @@ const App = () => {
     }
     
     EventBus.on("logout", () => {
-        logOut();
-      });
+      logOut();
+    });
+
+    if (currentUser && !userContentLoaded) {
+      dispatch(getUsercontent())
+        .then(() => {
+          setUserContentLoaded(true);
+        })
+        .catch(() => {
+          EventBus.dispatch("logout");
+        });
+    }
 
     return () => {
       EventBus.remove("logout");
     };
-  }, [dispatch, location, logOut]);
+  }, [dispatch, location, logOut, currentUser, userContentLoaded]);
 
   const setupOrElement = (element) => {
-    if (currentUser && userData && userData.netWorth == null) {
+    if (currentUser && userData && userData.netWorth === null) {
       return <Setup />;
     } else {
       return element;
@@ -57,7 +70,7 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && userData && userData.netWorth != null && <Sidebar />}
+      {currentUser && userData && userData.netWorth !== null && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>

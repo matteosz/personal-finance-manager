@@ -28,4 +28,30 @@ public class NetWorth {
 
   @Column(nullable = false)
   private LocalDate startDate;
+
+  public NetWorth() {
+    // Public empty constructor
+  }
+
+  public NetWorth(User user, BigDecimal value, LocalDate startDate) {
+    this.user = user;
+    this.value = value;
+    this.startDate = startDate;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public BigDecimal getValue() {
+    return value;
+  }
+
+  public LocalDate getStartDate() {
+    return startDate;
+  }
 }

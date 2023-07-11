@@ -1,12 +1,8 @@
 import React, { useState } from "react";
-
-import { NetWorth } from "../objects/Networth";
 import { useDispatch, useSelector } from "react-redux";
 
-import { CURRENCIES } from "../objects/Currency";
-
-import UserService from "../services/user.service";
-import { updateUserContent } from "../actions/user";
+import { CURRENCIES, convertCurrency } from "../objects/Currency";
+import { setupUser } from "../actions/user";
 
 import "./Dashboard.css";
 
@@ -14,8 +10,8 @@ const Setup = () => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
+  const { message } = useSelector(state => state.message);
   const {user: userData} = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
@@ -23,17 +19,14 @@ const Setup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
-    UserService.postUserSetup(parseFloat(amount), currency)
-      .then((response) => {
-        // Dispatch the info to user
-        const newNetworth = NetWorth({rates: userData.lastRates, value: parseFloat(amount), currency: currency, date: response.date});
-        dispatch(updateUserContent({ netWorth: newNetworth }));
+    const amountEUR = convertCurrency(userData.lastRates, parseFloat(amount), currency, "EUR");
+
+    dispatch(setupUser(amountEUR))
+      .then(() => {
         setLoading(false);
       })
-      .catch((error) => {
-        setError('Failed to set up account. Please try again' + error);
+      .catch(() => {
         setLoading(false);
       });
   };
@@ -49,7 +42,8 @@ const Setup = () => {
               <label htmlFor="amount">Net Worth</label>
               <input
                 type="number"
-                step="0.5"
+                step="0.01"
+                min={0}
                 className="form-control"
                 id="amount"
                 value={amount}
@@ -78,11 +72,11 @@ const Setup = () => {
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ?  <div className="spinner"></div> : "Set up"}
             </button>
-            {error && (
+            {message && (
                 <div className="form-group">
                     <br></br>
                     <div className="alert alert-danger" role="alert">
-                        {error}
+                        {message}
                     </div>
                 </div>
             )}

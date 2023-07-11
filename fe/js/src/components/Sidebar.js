@@ -116,13 +116,13 @@ const Sidebar = () => {
     useEffect(() => {
         if (userData && userData.netWorth) {
             // Calculate and update the net worth based on the user data
-            setNetWorth(userData.netWorth);
+            setNetWorth(userData.netWorth.value);
         }
     }, [userData]);
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
-        const newAmount = convertCurrency(userData.lastRates, userData.netWorth, "EUR", currency);
+        const newAmount = convertCurrency(userData.lastRates, userData.netWorth.value, "EUR", currency);
 
         // Update the currency
         setNetWorth(newAmount);
@@ -175,7 +175,7 @@ const Sidebar = () => {
                                 {item.icon}
                                 <span style={{marginLeft: '16px'}}>{item.title}
                                 <br></br>
-                                {Currency({value: netWorth.value, code: selectedCurrency})}</span>
+                                {Currency({value: netWorth, code: selectedCurrency})}</span>
                             </MenuNotPageItems>
                         )
                     }

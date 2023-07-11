@@ -1,14 +1,6 @@
-import { SET_USER_CONTENT, UPDATE_USER_CONTENT } from "../actions/types";
+import { SET_USER_CONTENT, UPDATE_USER_NW } from "../actions/types";
 
-const initialState = {
-    user: {
-        rates: [],
-        networth: null,
-        expenses: [],
-        income: [],
-        assets: [],
-    },
-};
+const initialState = {};
 
 const userReducer = (state = initialState, action) => {
     switch (action.type) {
@@ -17,12 +9,12 @@ const userReducer = (state = initialState, action) => {
             ...state,
             user: action.payload,
         };
-        case UPDATE_USER_CONTENT:
+        case UPDATE_USER_NW:
         return {
             ...state,
             user: {
-            ...state.user,
-            ...action.payload,
+                ...state.user,
+                netWorth: action.payload,
             },
         };
         default:
