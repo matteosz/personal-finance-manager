@@ -4,7 +4,6 @@ import { Alert, Card, Col, Container, Row } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { CURRENCIES, convertCurrency } from "../objects/Currency";
-import { FormattedDate } from "../objects/FormattedDate"
 
 const MONTHS = {
   "3M": 3,
@@ -13,88 +12,25 @@ const MONTHS = {
   "MAX": 1000,
 };
 
-const MONTHS_FROM_MS = 30 * 24 * 60 * 60 * 1000;
-
 const Dashboard = () => {
   const { message } = useSelector(state => state.message);
   const { user: userData } = useSelector(state => state.user);
   const { currency: selectedCurrency } = useSelector(state => state.currency);
+  const { finance: {
+    rates: globalRates,
+    dates: globalDates,
+    netWorth: globalNetWorthData,
+    expenses: globalExpenseData,
+    income: globalIncomeData,
+    assets: globalAssetsData,
+  } } = useSelector(state => state.global);
 
   const prevSelectedCurrency = useRef(selectedCurrency);
 
   const [timespan, setTimespan] = useState("3M");
-  const [rates, setRates] = useState({});
-  
-  const [globalDates, setGlobalDates] = useState([]);
-  const [globalNetWorthData, setGlobalNetWorthData] = useState([]);
-  const [globalExpenseData, setGlobalExpenseData] = useState([]);
-  const [globalIncomeData, setGlobalIncomeData] = useState([]);
-  const [globalAssetsData, setGlobalAssetsData] = useState([]);
 
   const [plottedNetWorthData, setPlottedNetWorthData] = useState([]);
-  const [plottedExpenseData, setPlottedExpenseData] = useState([]);
-  const [plottedIncomeData, setPlottedIncomeData] = useState([]);
   const [plottedAssetsData, setPlottedAssetsData] = useState([]);
-
-  // Compute the global data for the user for each month (global history) every time the data changes
-  useEffect(() => {
-    if (userData) {
-      const { lastRates, netWorth, expenses, income, assets } = userData;
-
-      setRates(lastRates);
-
-      const startDate = new Date(netWorth.startDate);
-      const currentDate = new Date(); 
-      const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
-
-      const bucketDates = [];
-      const bucketedNetWorth = [];
-      const bucketedExpenses = [];
-      const bucketedIncome = [];
-      const bucketedAssets = [];
-
-      const initialYear = startDate.getFullYear();
-      const initialMonth = startDate.getMonth();
-      for (let i = 0; i <= maxMonths; ++i) {
-        const year = initialYear + Math.floor(i / 12);
-        const month = (initialMonth + i ) % 12;
-
-        const currentMonth = new Date(year, month);
-        bucketDates.push(FormattedDate(currentMonth));
-  
-        const monthExpenses = expenses.filter((expense) => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
-        }).reduce((a, b) => a.amount + b.amount, 0);
-
-        bucketedExpenses.push(monthExpenses);
-  
-        const monthIncome = income.filter((income) => {
-          const incomeDate = new Date(income.date);
-          return incomeDate.getFullYear() === year && incomeDate.getMonth() === month;
-        }).reduce((a, b) => a.amount + b.amount, 0);
-
-        bucketedIncome.push(monthIncome);
-
-        const monthAssets = assets.reduce((a, b) => {
-          const monthAssetValueA = a.pricesByDate[currentMonth] || 0;
-          const monthAssetValueB = b.pricesByDate[currentMonth] || 0;
-          return monthAssetValueA + monthAssetValueB;
-        }, 0);
-
-        bucketedAssets.push(monthAssets);
-
-        const netSum = netWorth.value + monthIncome - monthExpenses + monthAssets;
-        bucketedNetWorth.push(netSum);
-      }
-
-      setGlobalDates(bucketDates);
-      setGlobalExpenseData(bucketedExpenses);
-      setGlobalIncomeData(bucketedIncome);
-      setGlobalAssetsData(bucketedAssets);
-      setGlobalNetWorthData(bucketedNetWorth);
-    }
-  }, [userData]);
 
   // Compute the data to be plotted as a slice of the global history whenever the timespan changes
   useEffect(() => {
@@ -119,7 +55,7 @@ const Dashboard = () => {
         const newAssetsData = [];
         for (let i = 0; i < timespanMonths; ++i) {
           const date = timespanDates[i];
-          const rate = rates[date];
+          const rate = globalRates[date];
 
           newNetworthData.push(convertCurrency(rate, timespanNetWorthData[i], "EUR", selectedCurrency));
           newExpenseData.push(convertCurrency(rate, timespanExpenseData[i], "EUR", selectedCurrency));
@@ -134,11 +70,9 @@ const Dashboard = () => {
       }
       
       setPlottedNetWorthData([{x: timespanDates, y: timespanNetWorthData, type: "scatter", mode: "lines+markers", name: "Net Worth"}]);
-      setPlottedExpenseData([{x: timespanDates, y: timespanExpenseData, type: "scatter", mode: "lines+markers", name: "Expenses"}]);
-      setPlottedIncomeData([{x: timespanDates, y: timespanIncomeData, type: "scatter", mode: "lines+markers", name: "Income"}]);
       setPlottedAssetsData([{x: timespanDates, y: timespanAssetsData, type: "scatter", mode: "lines+markers", name: "Assets"}]);
     }
-  }, [globalDates, globalNetWorthData, globalExpenseData, globalIncomeData, globalAssetsData, timespan, rates, selectedCurrency]);
+  }, [globalDates, globalNetWorthData, globalExpenseData, globalIncomeData, globalAssetsData, timespan, globalRates, selectedCurrency]);
 
   const renderTimespanButtons = () => {
     return (
@@ -178,8 +112,8 @@ const Dashboard = () => {
     // Filter expenses and income for the last month
     const l1 = globalExpenseData.length;
     const l2 = globalIncomeData.length;
-    const lastMonthExpenses = l1 > 0 ? globalExpenseData[l1 - 1] : 0;
-    const lastMonthIncome = l2 > 0 ? globalIncomeData[l2 - 1] : 0;
+    const lastMonthExpenses = l1 > 0 ? globalExpenseData[l1 - 1] : .0;
+    const lastMonthIncome = l2 > 0 ? globalIncomeData[l2 - 1] : .0;
 
     return (
       <Card>
@@ -195,7 +129,6 @@ const Dashboard = () => {
               <span>Income: </span>
               <span style={{color: "green"}}>{lastMonthIncome.toFixed(2)}{CURRENCIES[selectedCurrency]}</span>
             </div>
-            <br></br>
           </div>
         </Card.Body>
       </Card>
@@ -205,14 +138,13 @@ const Dashboard = () => {
   const render1YearCard = () => {
     // Filter expenses and income for the last year (last 12 months)
     const maxMonths = Math.min(12, globalDates.length);
-    const last1YearExpenses = globalExpenseData.length > 0 ? globalExpenseData.slice(-maxMonths).reduce((a, b) => a + b, 0) : 0;
-    const last1YearIncome = globalIncomeData.length > 0 ? globalIncomeData.slice(-maxMonths).reduce((a, b) => a + b, 0) : 0;
+    const last1YearExpenses = globalExpenseData.length > 0 ? globalExpenseData.slice(-maxMonths).reduce((a, b) => parseFloat(a) + parseFloat(b), .0) : .0;
+    const last1YearIncome = globalIncomeData.length > 0 ? globalIncomeData.slice(-maxMonths).reduce((a, b) => parseFloat(a) + parseFloat(b), .0) : .0;
 
     return (
       <Card>
         <Card.Body>
           <Card.Title style={{textAlign: "center"}}>Last Year</Card.Title>
-          <br></br>
           <div className="d-flex justify-content-between">
             <div>
               <span>Expenses: </span>

@@ -11,9 +11,14 @@ const postUserSetup = (amount) => {
   return axios.post(API_URL + "user/setup", { amount }, { headers: authHeader() });
 };
 
+const postUserAddExpense = (expense) => {
+  return axios.post(API_URL + "user/expense/add", expense, { headers: authHeader() });
+};
+
 const service = {
-    getUserBoard,
-    postUserSetup,
+  getUserBoard,
+  postUserSetup,
+  postUserAddExpense,
 };
 
 export default service;

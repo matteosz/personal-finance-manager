@@ -4,12 +4,18 @@ import static com.pfm.sbjwt.security.jwt.AuthTokenFilter.parseJwt;
 
 import com.pfm.sbjwt.components.ExchangeRateUpdater;
 import com.pfm.sbjwt.models.ExchangeRate;
+import com.pfm.sbjwt.models.Expense;
 import com.pfm.sbjwt.models.NetWorth;
 import com.pfm.sbjwt.models.User;
+import com.pfm.sbjwt.payload.request.AddExpenseRequest;
 import com.pfm.sbjwt.payload.request.SetupRequest;
+import com.pfm.sbjwt.payload.response.AddExpenseResponse;
 import com.pfm.sbjwt.payload.response.MessageResponse;
 import com.pfm.sbjwt.payload.response.SetupResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
+import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
+import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
+import com.pfm.sbjwt.repository.ExpenseRepository;
 import com.pfm.sbjwt.repository.NetWorthRepository;
 import com.pfm.sbjwt.repository.UserRepository;
 import com.pfm.sbjwt.security.jwt.JwtUtils;
@@ -44,6 +50,8 @@ public class TestController {
   @Autowired UserRepository userRepository;
 
   @Autowired NetWorthRepository netWorthRepository;
+
+  @Autowired ExpenseRepository expenseRepository;
 
   @GetMapping("/user")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -89,13 +97,25 @@ public class TestController {
     NetWorth netWorth = new NetWorth(user.get(), amount, date);
     netWorthRepository.save(netWorth);
 
-    return ResponseEntity.ok(new SetupResponse(netWorth));
+    return ResponseEntity.ok(new SetupResponse(new NetWorthNetwork(netWorth)));
   }
 
   @PostMapping("/user/expense/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> userExpense() {
-    return null;
+  public ResponseEntity<?> userExpense(
+      @Valid @RequestBody AddExpenseRequest addExpenseRequest, HttpServletRequest request) {
+    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
+
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user!"));
+    }
+
+    // Get the expense from the request
+    Expense expense = addExpenseRequest.buildExpense(user.get());
+    expenseRepository.save(expense);
+
+    return ResponseEntity.ok(new AddExpenseResponse(new ExpenseNetwork(expense)));
   }
 
   @GetMapping("/mod")

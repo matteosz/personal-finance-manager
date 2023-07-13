@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 
@@ -107,13 +107,34 @@ const NavBarItem = styled.div`
 const Sidebar = () => {
     const dispatch = useDispatch();
 
-    const [close, setClose] = useState(false)
-    const showSidebar = () => setClose(!close)
+    const [close, setClose] = useState(false);
+    const showSidebar = (event) => {
+        // Avoid the click event to propagate to the parent
+        event.stopPropagation();
+        setClose(!close);
+      };
+    const sidebarRef = useRef(null);
 
     const { user: userData } = useSelector(state => state.user);
     const { currency: selectedCurrency } = useSelector(state => state.currency);
 
     const [netWorth, setNetWorth] = useState(0);
+
+    // Close the sidebar when clicking outside of it
+    const handleOutsideClick = useCallback(
+        (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setClose(false);
+            }
+        }, []
+    );
+
+    useEffect(() => {
+        document.addEventListener('click', handleOutsideClick);
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, [handleOutsideClick]);
 
     useEffect(() => {
         if (userData && userData.netWorth) {
@@ -156,7 +177,7 @@ const Sidebar = () => {
                 </NavbarRight>
             </Navbar>
 
-            <SidebarMenu close={close}>
+            <SidebarMenu close={close} ref={sidebarRef}>
                 <MenuIconClose to="#" onClick={showSidebar}>
                     <FaIcons.FaTimes />
                 </MenuIconClose>

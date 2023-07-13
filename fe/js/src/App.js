@@ -19,10 +19,14 @@ import EventBus from "./common/EventBus";
 import { logout } from "./actions/auth";
 import { clearMessage } from "./actions/message";
 import { getUsercontent } from "./actions/user";
+import { FormattedDate } from "./objects/FormattedDate"
+import { setGlobalFinancialState } from "./actions/global";
+
+const MONTHS_FROM_MS = 30 * 24 * 60 * 60 * 1000;
 
 const App = () => {
-  const { user: currentUser } = useSelector((state) => state.auth);
-  const { user: userData } = useSelector((state) => state.user);
+  const { user: currentUser } = useSelector(state => state.auth);
+  const { user: userData } = useSelector(state => state.user);
 
   const [userContentLoaded, setUserContentLoaded] = useState(false);
 
@@ -58,6 +62,73 @@ const App = () => {
       EventBus.remove("logout");
     };
   }, [dispatch, location, logOut, currentUser, userContentLoaded]);
+
+  // Compute the global data for the user for each month (global history) every time the data changes
+  useEffect(() => {
+    if (userData) {
+      const { lastRates, netWorth, expenses, income, assets } = userData;
+
+      const startDate = new Date(netWorth.startDate);
+      const currentDate = new Date(); 
+      const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
+
+      const bucketDates = [];
+      const bucketedNetWorth = [];
+      const bucketedExpenses = [];
+      const bucketedIncome = [];
+      const bucketedAssets = [];
+
+      const initialYear = startDate.getFullYear();
+      const initialMonth = startDate.getMonth();
+      for (let i = 0; i <= maxMonths; ++i) {
+        const year = initialYear + Math.floor(i / 12);
+        const month = (initialMonth + i ) % 12;
+
+        const currentMonth = new Date(year, month);
+        const formattedDate = FormattedDate(currentMonth);
+        bucketDates.push(formattedDate);
+  
+        const monthExpenses = expenses
+        .filter((expense) => {
+          const expenseDate = new Date(expense.date);
+          return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
+        })
+        .map((expense) => parseFloat(expense.amount))
+        .reduce((a, b) => a + b, .0);
+
+        bucketedExpenses.push(monthExpenses);
+  
+        const monthIncome = income.filter((income) => {
+          const incomeDate = new Date(income.date);
+          return incomeDate.getFullYear() === year && incomeDate.getMonth() === month;
+        })
+        .map((expense) => parseFloat(expense.amount))
+        .reduce((a, b) => a + b, .0);
+
+        bucketedIncome.push(monthIncome);
+
+        const monthAssets = assets.reduce((a, b) => {
+          const monthAssetValueA = parseFloat(a.pricesByDate[formattedDate]) || .0;
+          const monthAssetValueB = parseFloat(b.pricesByDate[formattedDate]) || .0;
+          return monthAssetValueA + monthAssetValueB;
+        }, 0);
+
+        bucketedAssets.push(monthAssets);
+
+        const netSum = netWorth.value + monthIncome - monthExpenses + monthAssets;
+        bucketedNetWorth.push(netSum);
+      }
+
+      dispatch(setGlobalFinancialState({ 
+        rates: lastRates,
+        dates: bucketDates,
+        netWorth: bucketedNetWorth,
+        expenses: bucketedExpenses,
+        income: bucketedIncome,
+        assets: bucketedAssets,
+      }));
+    }
+  }, [userData, dispatch]);
 
   const setupOrElement = (element) => {
     if (currentUser && userData && !userData.netWorth) {

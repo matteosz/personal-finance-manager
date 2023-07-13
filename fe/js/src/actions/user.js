@@ -1,4 +1,4 @@
-import { SET_USER_CONTENT, SET_USER_CONTENT_FAIL, SET_MESSAGE, UPDATE_USER_NW, CLEAR_USER } from "./types";
+import { SET_USER_CONTENT, SET_USER_CONTENT_FAIL, SET_MESSAGE, UPDATE_USER_NW, CLEAR_USER, ADD_USER_EXPENSE } from "./types";
 import UserService from "../services/user.service";
 
 export const getUsercontent = () => (dispatch) => {
@@ -59,8 +59,35 @@ export const setupUser = (amount) => (dispatch) => {
     );
 };
 
+export const addExpense = (expense) => (dispatch) => {
+    return UserService.postUserAddExpense(expense).then(
+        (response) => {
+            dispatch({
+                type: ADD_USER_EXPENSE,
+                payload: response.data.expense,
+            });
+            return Promise.resolve();
+        },
+        (error) => {
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString();
+    
+            dispatch({
+                type: SET_MESSAGE,
+                payload: message,
+            });
+    
+            return Promise.reject();
+        }
+    );
+};
+
 export const clearUser = () => (dispatch) => {
     dispatch({
-      type: CLEAR_USER,
+        type: CLEAR_USER,
     });
-  };
+};

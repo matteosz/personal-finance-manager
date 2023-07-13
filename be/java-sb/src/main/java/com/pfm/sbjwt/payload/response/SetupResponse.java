@@ -1,15 +1,15 @@
 package com.pfm.sbjwt.payload.response;
 
-import com.pfm.sbjwt.models.NetWorth;
+import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
 
 public class SetupResponse {
-  private final NetWorth netWorth;
+  private final NetWorthNetwork netWorth;
 
-  public SetupResponse(NetWorth netWorth) {
+  public SetupResponse(NetWorthNetwork netWorth) {
     this.netWorth = netWorth;
   }
 
-  public NetWorth getNetWorth() {
+  public NetWorthNetwork getNetWorth() {
     return netWorth;
   }
 }
