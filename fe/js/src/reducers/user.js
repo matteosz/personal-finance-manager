@@ -1,4 +1,4 @@
-import { SET_USER_CONTENT, UPDATE_USER_NW } from "../actions/types";
+import { CLEAR_USER, SET_USER_CONTENT, UPDATE_USER_NW } from "../actions/types";
 
 const initialState = {};
 
@@ -16,6 +16,11 @@ const userReducer = (state = initialState, action) => {
                 ...state.user,
                 netWorth: action.payload,
             },
+        };
+        case CLEAR_USER:
+        return {
+            ...state,
+            user: null,
         };
         default:
         return state;

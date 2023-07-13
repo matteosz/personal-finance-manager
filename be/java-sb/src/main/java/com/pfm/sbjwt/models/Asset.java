@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "assets")
@@ -82,5 +84,9 @@ public class Asset {
 
   public BigDecimal getPurchasedAmount() {
     return purchasedAmount;
+  }
+
+  public Map<LocalDate, BigDecimal> getPricesByDate() {
+    return new HashMap<>();
   }
 }

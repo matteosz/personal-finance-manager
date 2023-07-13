@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import { SidebarData } from './SidebarData'
 import { Currency, convertCurrency, CURRENCIES } from '../objects/Currency'
 import { logout } from "../actions/auth";
+import { setCurrency } from "../actions/currency";
 
 const Navbar = styled.div`
     display: flex;
@@ -43,6 +44,7 @@ const SidebarMenu = styled.div`
     left: ${({ close }) => (close ? '0' : '-100%')};
     transition: 0.6s;
     overflow-y: auto;
+    z-index: 999;
 `;
 
 const MenuItems = styled.li`
@@ -108,9 +110,9 @@ const Sidebar = () => {
     const [close, setClose] = useState(false)
     const showSidebar = () => setClose(!close)
 
-    const {user: userData} = useSelector((state) => state.user);
+    const { user: userData } = useSelector(state => state.user);
+    const { currency: selectedCurrency } = useSelector(state => state.currency);
 
-    const [selectedCurrency, setSelectedCurrency] = useState('EUR');
     const [netWorth, setNetWorth] = useState(0);
 
     useEffect(() => {
@@ -122,11 +124,11 @@ const Sidebar = () => {
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
-        const newAmount = convertCurrency(userData.lastRates, userData.netWorth.value, "EUR", currency);
+        const newAmount = convertCurrency(userData.lastRates, userData.netWorth.value, "EUR", currency, true);
 
         // Update the currency
         setNetWorth(newAmount);
-        setSelectedCurrency(currency);
+        dispatch(setCurrency(currency));
     };
 
     const logOut = useCallback(() => {

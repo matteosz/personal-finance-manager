@@ -49,7 +49,18 @@ public class TestController {
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userAccess(HttpServletRequest request) {
     String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
-    Optional<List<ExchangeRate>> optionExchangeRates = exchangeRateService.findLatestRates();
+    // Find the user content
+    Optional<User> optUser = userRepository.findByUsername(username);
+    if (optUser.isEmpty()) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find any data!"));
+    }
+    User user = optUser.get();
+
+    NetWorth netWorth = user.getNetWorth();
+    LocalDate startDate = netWorth == null ? LocalDate.of(2000, 1, 1) : netWorth.getStartDate();
+
+    Optional<List<ExchangeRate>> optionExchangeRates =
+        exchangeRateService.getRatesAfterDate(startDate);
     List<ExchangeRate> rates;
     // Force the update of exchange rates if none is present (bootstrapping)
     if (optionExchangeRates.isEmpty() || optionExchangeRates.get().isEmpty()) {
@@ -57,12 +68,8 @@ public class TestController {
     } else {
       rates = optionExchangeRates.get();
     }
-    // Find the user content
-    Optional<User> user = userRepository.findByUsername(username);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find any data!"));
-    }
-    return ResponseEntity.ok(new UserResponse(rates, user.get()));
+
+    return ResponseEntity.ok(new UserResponse(rates, user));
   }
 
   @PostMapping("/user/setup")

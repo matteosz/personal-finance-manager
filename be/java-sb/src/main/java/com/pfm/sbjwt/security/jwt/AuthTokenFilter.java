@@ -2,10 +2,9 @@ package com.pfm.sbjwt.security.jwt;
 
 import com.pfm.sbjwt.security.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull FilterChain filterChain) {
     try {
       String jwt = parseJwt(request);
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -40,11 +40,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
+
+      filterChain.doFilter(request, response);
     } catch (Exception e) {
       logger.error("Cannot set user authentication", e);
     }
-
-    filterChain.doFilter(request, response);
   }
 
   public static String parseJwt(HttpServletRequest request) {

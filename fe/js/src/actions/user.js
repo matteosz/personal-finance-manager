@@ -1,4 +1,4 @@
-import { SET_USER_CONTENT, SET_USER_CONTENT_FAIL, SET_MESSAGE, UPDATE_USER_NW } from "./types";
+import { SET_USER_CONTENT, SET_USER_CONTENT_FAIL, SET_MESSAGE, UPDATE_USER_NW, CLEAR_USER } from "./types";
 import UserService from "../services/user.service";
 
 export const getUsercontent = () => (dispatch) => {
@@ -37,7 +37,7 @@ export const setupUser = (amount) => (dispatch) => {
         (response) => {
             dispatch({
                 type: UPDATE_USER_NW,
-                payload: response.data,
+                payload: response.data.netWorth,
             });
             return Promise.resolve();
         },
@@ -58,3 +58,9 @@ export const setupUser = (amount) => (dispatch) => {
         }
     );
 };
+
+export const clearUser = () => (dispatch) => {
+    dispatch({
+      type: CLEAR_USER,
+    });
+  };

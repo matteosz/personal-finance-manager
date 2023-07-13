@@ -5,7 +5,13 @@ export const CURRENCIES = {
     GBP: "£",
 };
 
-export const convertCurrency = (exchangeRates, amount, from, to) => {
+export const convertCurrency = (exchangeRates, amount, from, to, lastDate = false) => {
+    if (lastDate) {
+        const dates = Object.keys(exchangeRates);
+        dates.sort((a, b) => b.localeCompare(a));
+        exchangeRates = exchangeRates[dates[0]];
+    }
+    
     // Check if the rates are loaded
     if (exchangeRates === null) {
         throw new Error("Exchange rates not loaded");

@@ -37,19 +37,18 @@ const App = () => {
   }, [dispatch, navigate]);
 
   useEffect(() => {
-    if (["/login", "/register"].includes(location.pathname)) {
+    if (["/login", "/register", "/home"].includes(location.pathname)) {
       dispatch(clearMessage()); // clear message when changing location
     }
     
     EventBus.on("logout", () => {
       logOut();
+      setUserContentLoaded(false);
     });
 
     if (currentUser && !userContentLoaded) {
+      setUserContentLoaded(true);
       dispatch(getUsercontent())
-        .then(() => {
-          setUserContentLoaded(true);
-        })
         .catch(() => {
           EventBus.dispatch("logout");
         });
@@ -61,7 +60,7 @@ const App = () => {
   }, [dispatch, location, logOut, currentUser, userContentLoaded]);
 
   const setupOrElement = (element) => {
-    if (currentUser && userData && userData.netWorth === null) {
+    if (currentUser && userData && !userData.netWorth) {
       return <Setup />;
     } else {
       return element;
@@ -70,7 +69,7 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && userData && userData.netWorth !== null && <Sidebar />}
+      {currentUser && userData && userData.netWorth && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>

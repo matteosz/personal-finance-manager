@@ -7,6 +7,10 @@ export const LOGOUT = "LOGOUT";
 export const SET_MESSAGE = "SET_MESSAGE";
 export const CLEAR_MESSAGE = "CLEAR_MESSAGE";
 
+
+export const SET_CURRENCY = "SET_CURRENCY";
+
 export const SET_USER_CONTENT = "SET_USER_CONTENT";
 export const SET_USER_CONTENT_FAIL = "SET_USER_CONTENT_FAIL";
 export const UPDATE_USER_NW = "UPDATE_USER_NETWORTH";
+export const CLEAR_USER = "CLEAR_USER";

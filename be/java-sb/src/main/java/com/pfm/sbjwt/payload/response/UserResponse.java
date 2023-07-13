@@ -1,51 +1,65 @@
 package com.pfm.sbjwt.payload.response;
 
-import com.pfm.sbjwt.models.Asset;
 import com.pfm.sbjwt.models.ExchangeRate;
-import com.pfm.sbjwt.models.Expense;
-import com.pfm.sbjwt.models.Income;
-import com.pfm.sbjwt.models.NetWorth;
 import com.pfm.sbjwt.models.User;
+import com.pfm.sbjwt.payload.response.models.AssetNetwork;
+import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
+import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
+import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class UserResponse {
-  private final Map<String, Float> lastRates = new HashMap<>();
+  private final Map<LocalDate, Map<String, Float>> lastRates = new TreeMap<>();
 
-  private final NetWorth netWorth;
+  private final NetWorthNetwork netWorth;
 
-  private final List<Expense> expenses;
+  private final List<ExpenseNetwork> expenses;
 
-  private final List<Income> income;
+  private final List<IncomeNetwork> income;
 
-  private final List<Asset> assets;
+  private final List<AssetNetwork> assets;
 
-  public UserResponse(List<ExchangeRate> lastRates, User user) {
-    netWorth = user.getNetWorth();
-    expenses = user.getExpenses();
-    income = user.getIncome();
-    assets = user.getAssets();
-    lastRates.forEach(rate -> this.lastRates.put(rate.getCurrencyCode(), rate.getRate()));
+  public UserResponse(List<ExchangeRate> exchangeRates, User user) {
+    netWorth = user.getNetWorthNetwork();
+    expenses = user.getExpensesNetwork();
+    income = user.getIncomeNetwork();
+    assets = user.getAssetsNetwork();
+
+    for (ExchangeRate exchangeRate : exchangeRates) {
+      LocalDate date = exchangeRate.getTimestamp();
+      YearMonth yearMonth = YearMonth.from(date);
+
+      // Get or create the map for the given month
+      Map<String, Float> ratesByCurrency =
+          lastRates.computeIfAbsent(yearMonth.atDay(1), k -> new HashMap<>());
+
+      // Add the exchange rate for the currency
+      ratesByCurrency.put(exchangeRate.getCurrencyCode(), exchangeRate.getRate());
+    }
   }
 
-  public Map<String, Float> getLastRates() {
+  public Map<LocalDate, Map<String, Float>> getLastRates() {
     return lastRates;
   }
 
-  public NetWorth getNetWorth() {
+  public NetWorthNetwork getNetWorth() {
     return netWorth;
   }
 
-  public List<Expense> getExpenses() {
+  public List<ExpenseNetwork> getExpenses() {
     return expenses;
   }
 
-  public List<Income> getIncome() {
+  public List<IncomeNetwork> getIncome() {
     return income;
   }
 
-  public List<Asset> getAssets() {
+  public List<AssetNetwork> getAssets() {
     return assets;
   }
 }

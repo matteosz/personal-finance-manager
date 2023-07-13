@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "rates")
@@ -19,14 +19,15 @@ public class ExchangeRate {
   @NotBlank
   @Size(max = 3)
   private String currencyCode;
+
   private Float rate;
-  private LocalDateTime timestamp;
+  private LocalDate timestamp;
 
   public ExchangeRate() {
     // Empty constructor
   }
 
-  public ExchangeRate(String currencyCode, Float rate, LocalDateTime timestamp) {
+  public ExchangeRate(String currencyCode, Float rate, LocalDate timestamp) {
     this.currencyCode = currencyCode;
     this.rate = rate;
     this.timestamp = timestamp;
@@ -35,6 +36,7 @@ public class ExchangeRate {
   public String getCurrencyCode() {
     return currencyCode;
   }
+
   public Float getRate() {
     return rate;
   }
@@ -43,7 +45,7 @@ public class ExchangeRate {
     return id;
   }
 
-  public LocalDateTime getTimestamp() {
+  public LocalDate getTimestamp() {
     return timestamp;
   }
 
@@ -59,7 +61,7 @@ public class ExchangeRate {
     this.rate = rate;
   }
 
-  public void setTimestamp(LocalDateTime timestamp) {
+  public void setTimestamp(LocalDate timestamp) {
     this.timestamp = timestamp;
   }
 }

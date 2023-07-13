@@ -8,6 +8,7 @@ import {
 } from "./types";
   
 import AuthService from "../services/auth.service";
+import { clearUser } from "./user";
 
 export const register = (username, email, password) => (dispatch) => {
   return AuthService.register(username, email, password).then(
@@ -79,6 +80,7 @@ export const login = (username, password) => (dispatch) => {
 
 export const logout = () => (dispatch) => {
   AuthService.logout();
+  dispatch(clearUser());
 
   dispatch({
     type: LOGOUT,

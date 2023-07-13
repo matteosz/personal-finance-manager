@@ -1,5 +1,9 @@
 package com.pfm.sbjwt.models;
 
+import com.pfm.sbjwt.payload.response.models.AssetNetwork;
+import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
+import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
+import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(
@@ -41,16 +46,16 @@ public class User {
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Expense> expenses = new ArrayList<>();
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Income> income = new ArrayList<>();
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Asset> assets = new ArrayList<>();
 
-  @OneToOne(mappedBy = "user")
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private NetWorth netWorth;
 
   public User() {
@@ -97,6 +102,22 @@ public class User {
 
   public NetWorth getNetWorth() {
     return netWorth;
+  }
+
+  public List<ExpenseNetwork> getExpensesNetwork() {
+    return expenses.stream().map(ExpenseNetwork::new).collect(Collectors.toList());
+  }
+
+  public List<IncomeNetwork> getIncomeNetwork() {
+    return income.stream().map(IncomeNetwork::new).collect(Collectors.toList());
+  }
+
+  public List<AssetNetwork> getAssetsNetwork() {
+    return assets.stream().map(AssetNetwork::new).collect(Collectors.toList());
+  }
+
+  public NetWorthNetwork getNetWorthNetwork() {
+    return netWorth == null ? null : new NetWorthNetwork(netWorth);
   }
 
   public void setRoles(Set<Role> roles) {

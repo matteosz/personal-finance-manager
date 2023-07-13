@@ -1,7 +1,7 @@
 package com.pfm.sbjwt.repository;
 
 import com.pfm.sbjwt.models.ExchangeRate;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,15 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
 
-  @Query("SELECT er FROM ExchangeRate er WHERE er.timestamp = "
-      + "(SELECT MAX(er2.timestamp) FROM ExchangeRate er2)")
-  Optional<List<ExchangeRate>> findLatestExchangeRates();
+  Optional<List<ExchangeRate>> findExchangeRatesByTimestampIsGreaterThanEqual(LocalDate timestamp);
 
   @Query("SELECT MAX(er.timestamp) FROM ExchangeRate er")
-  Optional<LocalDateTime> findLatestTimestamp();
+  Optional<LocalDate> findLatestTimestamp();
 
   @Modifying
   @Transactional
   @Query("DELETE FROM ExchangeRate er WHERE er.timestamp = :timestamp")
-  void deleteExchangeRatesByTimestamp(@Param("timestamp") LocalDateTime timestamp);
+  void deleteExchangeRatesByTimestamp(@Param("timestamp") LocalDate timestamp);
 }

@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.pfm.sbjwt.models.ExchangeRate;
 import com.pfm.sbjwt.services.ExchangeRateService;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,14 +33,14 @@ public class ExchangeRateUpdater {
 
   @Scheduled(cron = "59 23 * * ?") // Runs every day at 23:59
   public List<ExchangeRate> updateExchangeRates() {
-    LocalDateTime timestamp = LocalDateTime.now();
+    LocalDate timestamp = LocalDate.now();
     List<ExchangeRate> exchangeRates = fetchExchangeRatesFromExternalAPI(timestamp);
     exchangeRateService.saveOrUpdateExchangeRates(exchangeRates, timestamp);
     return exchangeRates;
   }
 
   @NonNull
-  private List<ExchangeRate> fetchExchangeRatesFromExternalAPI(LocalDateTime timestamp) {
+  private List<ExchangeRate> fetchExchangeRatesFromExternalAPI(LocalDate timestamp) {
     String apiUrl = String.format("https://openexchangerates.org/api/latest.json?app_id=%s", apiID);
     List<ExchangeRate> rates = new ArrayList<>();
 
@@ -50,20 +50,18 @@ public class ExchangeRateUpdater {
 
     if (response.getStatusCode().is2xxSuccessful()) {
       // Extract exchange rates from the JSON response
-      JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(response.getBody()))
-                                        .getAsJsonObject();
+      JsonObject jsonObject =
+          JsonParser.parseString(Objects.requireNonNull(response.getBody())).getAsJsonObject();
       JsonObject ratesObject = jsonObject.getAsJsonObject("rates");
 
       // Filter the currency of interest and populate the list
-      ratesObject
-          .keySet()
-          .stream()
+      ratesObject.keySet().stream()
           .filter(FILTER::contains)
-          .forEach(currency ->
-              rates.add(
-                  new ExchangeRate(currency, ratesObject.get(currency).getAsFloat(), timestamp)
-              )
-          );
+          .forEach(
+              currency ->
+                  rates.add(
+                      new ExchangeRate(
+                          currency, ratesObject.get(currency).getAsFloat(), timestamp)));
     }
 
     return rates;

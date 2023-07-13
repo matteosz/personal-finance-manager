@@ -1,24 +1,15 @@
 package com.pfm.sbjwt.payload.response;
 
 import com.pfm.sbjwt.models.NetWorth;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class SetupResponse {
-  private final BigDecimal value;
-
-  private final LocalDate startDate;
+  private final NetWorth netWorth;
 
   public SetupResponse(NetWorth netWorth) {
-    this.value = netWorth.getValue();
-    this.startDate = netWorth.getStartDate();
+    this.netWorth = netWorth;
   }
 
-  public BigDecimal getValue() {
-    return value;
-  }
-
-  public LocalDate getStartDate() {
-    return startDate;
+  public NetWorth getNetWorth() {
+    return netWorth;
   }
 }
