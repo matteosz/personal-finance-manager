@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class ExpenseNetwork {
+  private final Long id;
   private final LocalDate date;
 
   private final String currencyCode;
@@ -18,12 +19,17 @@ public class ExpenseNetwork {
   private final BigDecimal amount;
 
   public ExpenseNetwork(Expense expense) {
+    id = expense.getId();
     date = expense.getTimestamp();
     currencyCode = expense.getCurrencyCode();
     category = expense.getCategory();
     subCategory = expense.getSubCategory();
     description = expense.getDescription();
     amount = expense.getAmount();
+  }
+
+  public Long getId() {
+    return id;
   }
 
   public LocalDate getDate() {

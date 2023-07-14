@@ -10,7 +10,7 @@ import Setup from "./components/Setup";
 import Register from "./components/Register";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
-import Expenses from "./components/Expenses";
+import Expense from "./components/Expenses";
 import Income from "./components/Income";
 import Assets from "./components/Assets";
 
@@ -44,12 +44,9 @@ const App = () => {
     if (["/login", "/register", "/home"].includes(location.pathname)) {
       dispatch(clearMessage()); // clear message when changing location
     }
-    
-    EventBus.on("logout", () => {
-      logOut();
-      setUserContentLoaded(false);
-    });
+  }, [dispatch, location]);
 
+  useEffect(() => {
     if (currentUser && !userContentLoaded) {
       setUserContentLoaded(true);
       dispatch(getUsercontent())
@@ -57,11 +54,18 @@ const App = () => {
           EventBus.dispatch("logout");
         });
     }
+  }, [currentUser, userContentLoaded, dispatch]);
+
+  useEffect(() => {
+    EventBus.on("logout", () => {
+      logOut();
+      setUserContentLoaded(false);
+    });
 
     return () => {
       EventBus.remove("logout");
     };
-  }, [dispatch, location, logOut, currentUser, userContentLoaded]);
+  }, [logOut]);
 
   // Compute the global data for the user for each month (global history) every time the data changes
   useEffect(() => {
@@ -148,7 +152,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={setupOrElement(<Dashboard />)} />
-          <Route path="/expenses" element={setupOrElement(<Expenses />)} />
+          <Route path="/expenses" element={setupOrElement(<Expense />)} />
           <Route path="/income" element={setupOrElement(<Income />)} />
           <Route path="/assets" element={setupOrElement(<Assets />)} />
         </Routes>

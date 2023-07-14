@@ -5,7 +5,7 @@ import { CURRENCIES, convertCurrency } from "../objects/Currency";
 import { setupUser } from "../actions/user";
 
 import * as FaIcons from 'react-icons/fa'
-import "./Dashboard.css";
+import "./ComponentsStyles.css";
 import { clearMessage } from "../actions/message";
 
 const Setup = () => {

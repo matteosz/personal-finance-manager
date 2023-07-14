@@ -5,6 +5,8 @@ import Plot from "react-plotly.js";
 
 import { CURRENCIES, convertCurrency } from "../objects/Currency";
 
+import "./ComponentsStyles.css"
+
 const MONTHS = {
   "3M": 3,
   "6M": 6,
@@ -112,8 +114,8 @@ const Dashboard = () => {
     // Filter expenses and income for the last month
     const l1 = globalExpenseData.length;
     const l2 = globalIncomeData.length;
-    const lastMonthExpenses = l1 > 0 ? globalExpenseData[l1 - 1] : .0;
-    const lastMonthIncome = l2 > 0 ? globalIncomeData[l2 - 1] : .0;
+    const lastMonthExpenses = l1 > 0 ? convertCurrency(globalRates, globalExpenseData[l1 - 1], "EUR", selectedCurrency, true) : .0;
+    const lastMonthIncome = l2 > 0 ? convertCurrency(globalRates, globalIncomeData[l2 - 1], "EUR", selectedCurrency, true) : .0;
 
     return (
       <Card>
@@ -138,8 +140,13 @@ const Dashboard = () => {
   const render1YearCard = () => {
     // Filter expenses and income for the last year (last 12 months)
     const maxMonths = Math.min(12, globalDates.length);
-    const last1YearExpenses = globalExpenseData.length > 0 ? globalExpenseData.slice(-maxMonths).reduce((a, b) => parseFloat(a) + parseFloat(b), .0) : .0;
-    const last1YearIncome = globalIncomeData.length > 0 ? globalIncomeData.slice(-maxMonths).reduce((a, b) => parseFloat(a) + parseFloat(b), .0) : .0;
+    const periodRates = globalDates.slice(-maxMonths).map((date) => globalRates[date]);
+    const last1YearExpenses = globalExpenseData.length > 0 ? globalExpenseData.slice(-maxMonths)
+                                                              .map((value, index) => convertCurrency(periodRates[index], parseFloat(value), "EUR", selectedCurrency))
+                                                              .reduce((a, b) => a + b, .0) : .0;
+    const last1YearIncome = globalIncomeData.length > 0 ? globalIncomeData.slice(-maxMonths)
+                                                              .map((value, index) => convertCurrency(periodRates[index], parseFloat(value), "EUR", selectedCurrency))
+                                                              .reduce((a, b) => a + b, .0) : .0;
 
     return (
       <Card>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 
 import * as FaIcons from 'react-icons/fa' 
@@ -106,17 +106,22 @@ const NavBarItem = styled.div`
 
 const Sidebar = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
 
     const [close, setClose] = useState(false);
+    const sidebarRef = useRef(null);
     const showSidebar = (event) => {
+        event.preventDefault();
         // Avoid the click event to propagate to the parent
         event.stopPropagation();
         setClose(!close);
-      };
-    const sidebarRef = useRef(null);
+    };
 
-    const { user: userData } = useSelector(state => state.user);
     const { currency: selectedCurrency } = useSelector(state => state.currency);
+    const { finance: {
+            rates: globalRates,
+            netWorth: globalNetWorthData,
+        } } = useSelector(state => state.global);
 
     const [netWorth, setNetWorth] = useState(0);
 
@@ -136,16 +141,21 @@ const Sidebar = () => {
         };
     }, [handleOutsideClick]);
 
+    // When the location changes then closes the sidebar (not working)
     useEffect(() => {
-        if (userData && userData.netWorth) {
+        setClose(false);
+    }, [location]);
+
+    useEffect(() => {
+        if (globalNetWorthData && globalNetWorthData.length > 0) {
             // Calculate and update the net worth based on the user data
-            setNetWorth(userData.netWorth.value);
+            setNetWorth(globalNetWorthData[globalNetWorthData.length - 1]);
         }
-    }, [userData]);
+    }, [globalNetWorthData]);
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
-        const newAmount = convertCurrency(userData.lastRates, userData.netWorth.value, "EUR", currency, true);
+        const newAmount = convertCurrency(globalRates, globalNetWorthData[globalNetWorthData.length - 1], "EUR", currency, true);
 
         // Update the currency
         setNetWorth(newAmount);
