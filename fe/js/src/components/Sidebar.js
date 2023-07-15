@@ -41,7 +41,7 @@ const SidebarMenu = styled.div`
     background-color: #000080;
     position: fixed;
     top: 0;
-    left: ${({ close }) => (close ? '0' : '-100%')};
+    left: ${({ $close }) => ($close ? '0' : '-100%')};
     transition: 0.6s;
     overflow-y: auto;
     z-index: 999;
@@ -149,9 +149,10 @@ const Sidebar = () => {
     useEffect(() => {
         if (globalNetWorthData && globalNetWorthData.length > 0) {
             // Calculate and update the net worth based on the user data
-            setNetWorth(globalNetWorthData[globalNetWorthData.length - 1]);
+            const nwInEur = globalNetWorthData[globalNetWorthData.length - 1];
+            setNetWorth(convertCurrency(globalRates, nwInEur, "EUR", selectedCurrency, true));
         }
-    }, [globalNetWorthData]);
+    }, [globalNetWorthData, globalRates, selectedCurrency]);
 
     const changeCurrency = (currency) => {
         // Convert from old to new currency the amount
@@ -187,7 +188,7 @@ const Sidebar = () => {
                 </NavbarRight>
             </Navbar>
 
-            <SidebarMenu close={close} ref={sidebarRef}>
+            <SidebarMenu $close={close} ref={sidebarRef}>
                 <MenuIconClose to="#" onClick={showSidebar}>
                     <FaIcons.FaTimes />
                 </MenuIconClose>

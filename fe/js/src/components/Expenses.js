@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Alert, Button, Card, Container, Form, Col, Row, Table } from "react-bootstrap";
 import { FaMinus, FaPlus, FaArrowUp, FaArrowDown, FaCheck, FaPencilAlt, FaTimes, FaTrash, FaEyeSlash, FaEye } from "react-icons/fa";
 
-import { addExpense } from "../actions/user";
+import { addExpense, modifyExpense } from "../actions/user";
 import { CURRENCIES } from "../objects/Currency";
 
 import "./ComponentsStyles.css";
@@ -55,6 +55,8 @@ const Expense = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const {user: userData} = useSelector(state => state.user);
+
+  const [expenses, setExpenses] = useState([]);
 
   const [subCategories, setSubCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -158,10 +160,17 @@ const Expense = () => {
     setIsModified(true);
   };  
 
-  const handleConfirmModification = (expense) => {
-    setModifiedExpense(null);
-    setIsModified(false);
-    // Send to the backend the request ....
+  const handleConfirmModification = () => {
+    
+    dispatch(modifyExpense(modifiedExpense))
+      .then(() => {
+        setSuccessMessage("Expense modified");
+        setModifiedExpense(null);
+        setIsModified(false);
+      })
+      .catch(() => {
+        setErrorMessage("Error modifying expense");
+      });
   };
 
   const handleDeleteModification = () => {
@@ -170,7 +179,13 @@ const Expense = () => {
   };
 
   const handleDeleteExpense = (expense) => {
-    // Send to the backend the request ....
+    dispatch(modifyExpense(expense, true))
+      .then(() => {
+        setSuccessMessage("Expense deleted");
+      })
+      .catch(() => {
+        setErrorMessage("Error deleting expense");
+      });
   };
 
   useEffect(() => {
@@ -187,63 +202,77 @@ const Expense = () => {
     return () => clearTimeout(timeout);
   }, [errorMessage]);
 
-  const filteredExpenses = userData.expenses.filter((expense) => {
-    const { date, currencyCode, category, amount } = expense;
-    const { month, year, category: filterCategory, currency, minAmount } =
-      filters;
+  useEffect(() => {
+    const filteredExpenses = userData.expenses.filter((expense) => {
+      const { date, currencyCode, category, amount } = expense;
+      const { month, year, category: filterCategory, currency, minAmount } =
+        filters;
 
-    if (month && month !== "" && new Date(date).getMonth() !== MONTHS[month]) {
-      return false;
-    }
+      if (month && month !== "" && new Date(date).getMonth() !== MONTHS[month]) {
+        return false;
+      }
 
-    if (year && new Date(date).getFullYear() !== parseInt(year)) {
-      return false;
-    }
+      if (year && new Date(date).getFullYear() !== parseInt(year)) {
+        return false;
+      }
 
-    if (currency && currencyCode !== currency) {
-      return false;
-    }
+      if (currency && currencyCode !== currency) {
+        return false;
+      }
 
-    if (filterCategory && category !== filterCategory) {
-      return false;
-    }
+      if (filterCategory && category !== filterCategory) {
+        return false;
+      }
 
-    if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
-      return false;
-    }
+      if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
 
-  const sortedExpenses = [...filteredExpenses].sort((a, b) => {
-    const fieldA = a[sortBy];
-    const fieldB = b[sortBy];
+    const sortedExpenses = [...filteredExpenses].sort((a, b) => {
+      const fieldA = a[sortBy];
+      const fieldB = b[sortBy];
 
-    // Custom sort for date as string sorting doesn't work
-    if (sortBy === "date") {
-      const dateA = new Date(fieldA);
-      const dateB = new Date(fieldB);
-      if (dateA < dateB) {
+      // Custom sort for date as string sorting doesn't work
+      if (sortBy === "date") {
+        const dateA = new Date(fieldA);
+        const dateB = new Date(fieldB);
+        if (dateA < dateB) {
+          return sortOrder === "asc" ? -1 : 1;
+        }
+        if (dateA > dateB) {
+          return sortOrder === "asc" ? 1 : -1;
+        }
+        return 0;
+      }
+
+      if (fieldA < fieldB) {
         return sortOrder === "asc" ? -1 : 1;
       }
-      if (dateA > dateB) {
+      if (fieldA > fieldB) {
         return sortOrder === "asc" ? 1 : -1;
       }
       return 0;
-    }
+    });
 
-    if (fieldA < fieldB) {
-      return sortOrder === "asc" ? -1 : 1;
-    }
-    if (fieldA > fieldB) {
-      return sortOrder === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+    setExpenses(sortedExpenses);
+  }, [userData, filters, sortBy, sortOrder, isModified, modifiedExpense]);
 
   return (
     <Container className="mt-3">
-      <h3 className="mb-4">Expense</h3>
+      {successMessage && (
+        <Alert variant="success" className="mt-3">
+          {successMessage}
+        </Alert>
+      )}
+      {errorMessage && (
+        <br></br>,
+        <Alert variant="danger" className="mt-3">
+          {errorMessage}
+        </Alert>
+      )}
 
       <Card>
         <Card.Header>
@@ -280,7 +309,7 @@ const Expense = () => {
                 type="date"
                 name="date"
                 value={expenseForm.date}
-                min={userData.netWorth.startDate}
+                min={userData.netWorth.startDate.slice(0, -2) + "01"}
                 onChange={handleInputChange}
                 required
               />
@@ -348,6 +377,7 @@ const Expense = () => {
                 rows={3}
                 name="description"
                 value={expenseForm.description}
+                placeholder="Enter description"
                 onChange={handleInputChange}
                 maxLength={100}
                 required
@@ -361,7 +391,8 @@ const Expense = () => {
                 step="0.01"
                 name="amount"
                 min="0"
-                value={parseFloat(expenseForm.amount)}
+                placeholder="Enter amount"
+                value={expenseForm.amount}
                 onChange={handleInputChange}
                 required
               />
@@ -375,21 +406,10 @@ const Expense = () => {
                     Add Expense
                 </Button>
             </div>
-            {errorMessage && (
-              <br></br>,
-              <Alert variant="danger" className="mt-3">
-                {errorMessage}
-              </Alert>
-            )}
           </Form>
           </Card.Body>
         )}
       </Card>
-      {successMessage && (
-        <Alert variant="success" className="mt-3">
-          {successMessage}
-        </Alert>
-      )}
 
       <Card className="mt-3">
         <Card.Header>
@@ -454,7 +474,7 @@ const Expense = () => {
                         min="1900"
                         max="2200"
                         name="year"
-                        value={parseInt(filters.year)}
+                        value={filters.year}
                         onChange={handleFilterChange}
                       />
                     </Form.Group>
@@ -497,7 +517,7 @@ const Expense = () => {
                         step="0.01"
                         min = "0"
                         name="minAmount"
-                        value={parseFloat(filters.minAmount)}
+                        value={filters.minAmount}
                         onChange={handleFilterChange}
                       />
                     </Form.Group>
@@ -530,8 +550,8 @@ const Expense = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedExpenses.map((expense) => (
-                    <tr>
+                  {expenses.map((expense) => (
+                    <tr key={expense.id}>
                       <td>
                         {isModified && modifiedExpense.id === expense.id ? (
                           <Form.Control
@@ -568,7 +588,7 @@ const Expense = () => {
                           required
                         />
                       ) : (
-                        expense.amount
+                        expense.amount.toFixed(2)
                       )}
                       </td>
                       <td>

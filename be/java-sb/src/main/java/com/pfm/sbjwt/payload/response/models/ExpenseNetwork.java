@@ -5,18 +5,29 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class ExpenseNetwork {
-  private final Long id;
-  private final LocalDate date;
+  private Long id;
+  private LocalDate date;
 
-  private final String currencyCode;
+  private String currencyCode;
 
-  private final String category;
+  private String category;
 
-  private final String subCategory;
+  private String subCategory;
 
-  private final String description;
+  private String description;
 
-  private final BigDecimal amount;
+  private BigDecimal amount;
+
+  private Boolean toBeDeleted;
+
+  public ExpenseNetwork() {
+    // Public empty constructor
+  }
+
+  public ExpenseNetwork(Long id) {
+    this.id = id;
+    toBeDeleted = true;
+  }
 
   public ExpenseNetwork(Expense expense) {
     id = expense.getId();
@@ -54,5 +65,9 @@ public class ExpenseNetwork {
 
   public BigDecimal getAmount() {
     return amount;
+  }
+
+  public Boolean getToBeDeleted() {
+    return toBeDeleted;
   }
 }

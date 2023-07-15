@@ -8,8 +8,9 @@ import com.pfm.sbjwt.models.Expense;
 import com.pfm.sbjwt.models.NetWorth;
 import com.pfm.sbjwt.models.User;
 import com.pfm.sbjwt.payload.request.AddExpenseRequest;
+import com.pfm.sbjwt.payload.request.ModifyExpenseRequest;
 import com.pfm.sbjwt.payload.request.SetupRequest;
-import com.pfm.sbjwt.payload.response.AddExpenseResponse;
+import com.pfm.sbjwt.payload.response.ExpenseResponse;
 import com.pfm.sbjwt.payload.response.MessageResponse;
 import com.pfm.sbjwt.payload.response.SetupResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
@@ -115,7 +116,38 @@ public class TestController {
     Expense expense = addExpenseRequest.buildExpense(user.get());
     expenseRepository.save(expense);
 
-    return ResponseEntity.ok(new AddExpenseResponse(new ExpenseNetwork(expense)));
+    return ResponseEntity.ok(new ExpenseResponse(new ExpenseNetwork(expense)));
+  }
+
+  @PostMapping("/user/expense/modify")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userExpense(
+      @Valid @RequestBody ModifyExpenseRequest modifyExpenseRequest, HttpServletRequest request) {
+    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
+
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user!"));
+    }
+
+    ExpenseNetwork expense;
+    if (modifyExpenseRequest.getDelete()) {
+      Long id = modifyExpenseRequest.getExpense().getId();
+      expenseRepository.removeExpenseById(id);
+      expense = new ExpenseNetwork(id);
+    } else {
+      expense = modifyExpenseRequest.getExpense();
+      expenseRepository.modifyExpenseById(
+          expense.getId(),
+          expense.getDate(),
+          expense.getCurrencyCode(),
+          expense.getCategory(),
+          expense.getSubCategory(),
+          expense.getDescription(),
+          expense.getAmount());
+    }
+
+    return ResponseEntity.ok(new ExpenseResponse(expense));
   }
 
   @GetMapping("/mod")

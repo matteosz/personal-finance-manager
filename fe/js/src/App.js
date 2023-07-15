@@ -21,6 +21,7 @@ import { clearMessage } from "./actions/message";
 import { getUsercontent } from "./actions/user";
 import { FormattedDate } from "./objects/FormattedDate"
 import { setGlobalFinancialState } from "./actions/global";
+import { convertCurrency } from "./objects/Currency";
 
 const MONTHS_FROM_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -91,13 +92,20 @@ const App = () => {
         const currentMonth = new Date(year, month);
         const formattedDate = FormattedDate(currentMonth);
         bucketDates.push(formattedDate);
-  
+
         const monthExpenses = expenses
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
           return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
         })
-        .map((expense) => parseFloat(expense.amount))
+        .map((expense) => {
+          const currency = expense.currencyCode;
+          const amount = parseFloat(expense.amount);
+          if (currency !== "EUR") {
+            return convertCurrency(lastRates[formattedDate], amount, currency, "EUR");
+          }
+          return amount;
+        })
         .reduce((a, b) => a + b, .0);
 
         bucketedExpenses.push(monthExpenses);
@@ -106,16 +114,35 @@ const App = () => {
           const incomeDate = new Date(income.date);
           return incomeDate.getFullYear() === year && incomeDate.getMonth() === month;
         })
-        .map((expense) => parseFloat(expense.amount))
+        .map((income) => {
+          const currency = income.currencyCode;
+          const amount = parseFloat(income.amount);
+          if (currency !== "EUR") {
+            return convertCurrency(lastRates[formattedDate], amount, currency, "EUR");
+          }
+          return amount;
+        })
         .reduce((a, b) => a + b, .0);
 
         bucketedIncome.push(monthIncome);
 
         const monthAssets = assets.reduce((a, b) => {
-          const monthAssetValueA = parseFloat(a.pricesByDate[formattedDate]) || .0;
-          const monthAssetValueB = parseFloat(b.pricesByDate[formattedDate]) || .0;
-          return monthAssetValueA + monthAssetValueB;
-        }, 0);
+          var priceA = a.pricesByDate[formattedDate];
+          if (priceA === undefined) {
+            priceA = .0;
+          } else {
+            priceA = convertCurrency(lastRates[formattedDate], parseFloat(priceA), a.currency, "EUR");
+          }
+
+          var priceB = b.pricesByDate[formattedDate];
+          if (priceB === undefined) {
+            priceB = .0;
+          } else {
+            priceB = convertCurrency(lastRates[formattedDate], parseFloat(priceB), b.currency, "EUR");
+          }
+
+          return priceA + priceB;
+        }, .0);
 
         bucketedAssets.push(monthAssets);
 

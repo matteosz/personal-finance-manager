@@ -2,10 +2,10 @@ package com.pfm.sbjwt.payload.response;
 
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 
-public class AddExpenseResponse {
+public class ExpenseResponse {
   private final ExpenseNetwork expense;
 
-  public AddExpenseResponse(ExpenseNetwork expense) {
+  public ExpenseResponse(ExpenseNetwork expense) {
     this.expense = expense;
   }
 
