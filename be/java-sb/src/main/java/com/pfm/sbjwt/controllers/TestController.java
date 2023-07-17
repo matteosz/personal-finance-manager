@@ -29,8 +29,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -123,17 +125,20 @@ public class TestController {
   @PostMapping("/user/expense/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userExpenseAdd(
-      @Valid @RequestBody AddExpenseRequest addExpenseRequest, HttpServletRequest request) {
+      @Valid @RequestBody AddExpenseRequest[] addExpenseRequests, HttpServletRequest request) {
     User user = getUserFromRequest(request);
     if (user == null) {
       return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
     // Get the expense from the request
-    Expense expense = addExpenseRequest.buildExpense(user);
-    expenseRepository.save(expense);
+    List<Expense> expenses =
+        Arrays.stream(addExpenseRequests)
+            .map(addExpenseRequest -> addExpenseRequest.buildExpense(user))
+            .collect(Collectors.toList());
+    expenseRepository.saveAll(expenses);
 
-    return ResponseEntity.ok(new ExpenseResponse(new ExpenseNetwork(expense)));
+    return ResponseEntity.ok(new ExpenseResponse(expenses));
   }
 
   @PostMapping("/user/income/add")

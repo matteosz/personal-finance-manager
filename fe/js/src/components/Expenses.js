@@ -36,10 +36,7 @@ import {
   MONTHS_TIMESPAN,
 } from "../common/constants";
 import { Currency, convertCurrency } from "../objects/Currency";
-import {
-  FormattedDate1Month,
-  FormattedDate,
-} from "../objects/FormattedDate";
+import { FormattedDate1Month, FormattedDate } from "../objects/FormattedDate";
 
 import "./ComponentsStyles.css";
 
@@ -58,6 +55,8 @@ const Expense = () => {
     subCategory: "",
     description: "",
     amount: "",
+    isRecurring: false,
+    recurringMonths: 1,
   });
   const [filters, setFilters] = useState({
     month: MONTHS[today.getMonth()],
@@ -117,11 +116,21 @@ const Expense = () => {
   };
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setExpenseForm((prevExpenseForm) => ({
-      ...prevExpenseForm,
-      [name]: value,
-    }));
+    const { name, value, type, checked } = event.target;
+
+    // Handle regular input fields
+    if (type !== "checkbox") {
+      setExpenseForm((prevExpenseForm) => ({
+        ...prevExpenseForm,
+        [name]: value,
+      }));
+    } else {
+      // Handle checkbox
+      setExpenseForm((prevExpenseForm) => ({
+        ...prevExpenseForm,
+        [name]: checked,
+      }));
+    }
   };
 
   const handleCategoryChange = (event) => {
@@ -136,7 +145,24 @@ const Expense = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    dispatch(addExpense(expenseForm))
+
+    // Process the recurring expense data if it is set
+    let expensesToAdd = [];
+    if (expenseForm.isRecurring) {
+      const startDate = new Date(expenseForm.date);
+      for (let i = 0; i < expenseForm.recurringMonths; i++) {
+        const currentMonth = new Date(startDate);
+        currentMonth.setMonth(startDate.getMonth() + i);
+        expensesToAdd.push({
+          ...expenseForm,
+          date: FormattedDate(currentMonth),
+        });
+      }
+    } else {
+      expensesToAdd.push(expenseForm);
+    }
+
+    dispatch(addExpense(expensesToAdd))
       .then(() => {
         setSuccessMessage("Expense added");
         setExpenseForm({
@@ -146,6 +172,8 @@ const Expense = () => {
           subCategory: "",
           description: "",
           amount: "",
+          isRecurring: false,
+          recurringMonths: 1,
         });
         toggleForm(false);
       })
@@ -172,6 +200,8 @@ const Expense = () => {
       subCategory: "",
       description: "",
       amount: "",
+      isRecurring: false,
+      recurringMonths: 1,
     });
   };
 
@@ -506,21 +536,27 @@ const Expense = () => {
       const maxLength = Math.min(timespan, globalExpenseData.length);
       const timespanData = globalExpenseData.slice(-maxLength);
 
-      const chart = [["Date", "Total expense of the month"]];
+      const chart = [["Date", ...Object.keys(CATEGORIES), "Total expense"]];
       timespanData.forEach((monthData) => {
+        const row = [];
         const date = FormattedDate(monthData.date);
-        chart.push([
-          date.slice(0, -3),
-          convertCurrency(
-            rates[date],
-            monthData.total,
-            "EUR",
-            selectedCurrency
-          ),
-        ]);
-      });
+        row.push(date.slice(0, -3));
+        monthData.categoryData.forEach((categoryData) => {
+          row.push(
+            convertCurrency(
+              rates[date],
+              categoryData.total,
+              "EUR",
+              selectedCurrency
+            )
+          );
+        });
+        row.push(
+          convertCurrency(rates[date], monthData.total, "EUR", selectedCurrency)
+        );
 
-      debugger;
+        chart.push(row);
+      });
 
       setChartData(chart);
     }
@@ -663,6 +699,31 @@ const Expense = () => {
                   required
                 />
               </Form.Group>
+
+              <Form.Group controlId="formRecurring">
+                <Form.Check
+                  type="checkbox"
+                  label="Recurring Expense"
+                  name="isRecurring"
+                  checked={expenseForm.isRecurring}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+
+              {expenseForm.isRecurring && (
+                <Form.Group controlId="formRecurringMonths">
+                  <Form.Label>Recurring for how many months</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="recurringMonths"
+                    min="1"
+                    max="12"
+                    value={expenseForm.recurringMonths}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Form.Group>
+              )}
 
               <br></br>
               <div style={{ position: "relative" }}>
@@ -1200,23 +1261,21 @@ const Expense = () => {
           <div className="container mt-5">
             <div style={{ display: "flex", justifyContent: "center" }}>
               <Chart
-                chartType="Bar"
+                chartType="ComboChart"
                 data={chartData}
-                height={"500px"}
+                height={"800px"}
+                width={"100%"}
                 options={{
-                  chart: {
-                    title: "Report of total expenses by each month",
-                  },
-                  width: 900,
-                  height: 500,
+                  title: "Report of total expenses by each month",
+                  seriesType: "bars",
                   series: {
-                    0: { axis: "Amount" },
+                    [Object.keys(CATEGORIES).length]: {
+                      type: "line",
+                    },
                   },
-                  axes: {
-                    y: {
-                      Amount: {
-                        label: "Amount (" + CURRENCIES[selectedCurrency] + ")",
-                      },
+                  vAxes: {
+                    0: {
+                      title: "Amount (" + CURRENCIES[selectedCurrency] + ")",
                     },
                   },
                 }}

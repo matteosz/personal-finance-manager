@@ -60,7 +60,7 @@ const userReducer = (state = initialState, action) => {
         ...state,
         user: {
           ...state.user,
-          expenses: [...state.user.expenses, action.payload],
+          expenses: [...state.user.expenses, ...action.payload],
         },
       };
     case UPDATE_USER_INCOME:

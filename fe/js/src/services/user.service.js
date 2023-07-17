@@ -15,8 +15,8 @@ const postUserSetup = (amount) => {
   );
 };
 
-const postUserAddExpense = (expense) => {
-  return axios.post(API_URL + "user/expense/add", expense, {
+const postUserAddExpense = (expenses) => {
+  return axios.post(API_URL + "user/expense/add", expenses, {
     headers: authHeader(),
   });
 };

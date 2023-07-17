@@ -67,8 +67,8 @@ export const setupUser = (amount) => (dispatch) => {
   );
 };
 
-export const addExpense = (expense) => (dispatch) => {
-  return UserService.postUserAddExpense(expense).then(
+export const addExpense = (expenses) => (dispatch) => {
+  return UserService.postUserAddExpense(expenses).then(
     (response) => {
       dispatch({
         type: ADD_USER_EXPENSE,
@@ -105,7 +105,7 @@ export const modifyExpense =
       (response) => {
         dispatch({
           type: MODIFY_USER_EXPENSE,
-          payload: response.data.expense,
+          payload: response.data.expense[0],
         });
         return Promise.resolve();
       },
