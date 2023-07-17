@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -135,7 +134,7 @@ public class TestController {
     List<Expense> expenses =
         Arrays.stream(addExpenseRequests)
             .map(addExpenseRequest -> addExpenseRequest.buildExpense(user))
-            .collect(Collectors.toList());
+            .toList();
     expenseRepository.saveAll(expenses);
 
     return ResponseEntity.ok(new ExpenseResponse(expenses));
@@ -144,17 +143,19 @@ public class TestController {
   @PostMapping("/user/income/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userIncomeAdd(
-      @Valid @RequestBody AddIncomeRequest addIncomeRequest, HttpServletRequest request) {
+      @Valid @RequestBody AddIncomeRequest[] addIncomeRequests, HttpServletRequest request) {
     User user = getUserFromRequest(request);
     if (user == null) {
       return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
-    // Get the expense from the request
-    Income income = addIncomeRequest.buildIncome(user);
-    incomeRepository.save(income);
+    List<Income> incomes =
+        Arrays.stream(addIncomeRequests)
+            .map(addIncomeRequest -> addIncomeRequest.buildIncome(user))
+            .toList();
+    incomeRepository.saveAll(incomes);
 
-    return ResponseEntity.ok(new IncomeResponse(new IncomeNetwork(income)));
+    return ResponseEntity.ok(new IncomeResponse(incomes));
   }
 
   @PostMapping("/user/expense/modify")

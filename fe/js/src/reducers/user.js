@@ -2,13 +2,11 @@ import {
   CLEAR_USER,
   SET_USER_CONTENT,
   UPDATE_USER_NW,
-  UPDATE_USER_EXPENSES,
-  UPDATE_USER_INCOME,
-  UPDATE_USER_ASSETS,
   ADD_USER_EXPENSE,
   ADD_USER_INCOME,
   ADD_USER_ASSET,
   MODIFY_USER_EXPENSE,
+  MODIFY_USER_INCOME,
 } from "../actions/types";
 
 const initialState = {};
@@ -26,14 +24,6 @@ const userReducer = (state = initialState, action) => {
         user: {
           ...state.user,
           netWorth: action.payload,
-        },
-      };
-    case UPDATE_USER_EXPENSES:
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          expenses: action.payload,
         },
       };
     case MODIFY_USER_EXPENSE:
@@ -63,12 +53,23 @@ const userReducer = (state = initialState, action) => {
           expenses: [...state.user.expenses, ...action.payload],
         },
       };
-    case UPDATE_USER_INCOME:
+      case MODIFY_USER_INCOME:
       return {
         ...state,
         user: {
           ...state.user,
-          income: action.payload,
+          income: state.user.income
+            .map((income) => {
+              if (income.id === action.payload.id) {
+                if (action.payload.toBeDeleted) {
+                  return null;
+                } else {
+                  return action.payload;
+                }
+              }
+              return income;
+            })
+            .filter(Boolean),
         },
       };
     case ADD_USER_INCOME:
@@ -76,15 +77,7 @@ const userReducer = (state = initialState, action) => {
         ...state,
         user: {
           ...state.user,
-          income: [...state.user.income, action.payload],
-        },
-      };
-    case UPDATE_USER_ASSETS:
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          assets: action.payload,
+          income: [...state.user.income, ...action.payload],
         },
       };
     case ADD_USER_ASSET:

@@ -16,7 +16,7 @@ public class ExpenseResponse {
     expenses = List.of(expense);
   }
 
-  public List<ExpenseNetwork> getExpense() {
+  public List<ExpenseNetwork> getExpenses() {
     return expenses;
   }
 }

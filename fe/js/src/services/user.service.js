@@ -21,8 +21,18 @@ const postUserAddExpense = (expenses) => {
   });
 };
 
+const postUserAddIncome = (income) => {
+  return axios.post(API_URL + "user/income/add", income, {
+    headers: authHeader(),
+  });
+};
+
 const postModifyExpense = (expense) => {
   return axios.post(API_URL + "user/expense/modify", expense, { headers: authHeader() });
+};
+
+const postModifyIncome = (income) => {
+  return axios.post(API_URL + "user/income/modify", income, { headers: authHeader() });
 };
 
 const service = {
@@ -30,6 +40,8 @@ const service = {
   postUserSetup,
   postUserAddExpense,
   postModifyExpense,
+  postUserAddIncome,
+  postModifyIncome,
 };
 
 export default service;

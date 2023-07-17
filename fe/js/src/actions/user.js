@@ -5,7 +5,9 @@ import {
   UPDATE_USER_NW,
   CLEAR_USER,
   ADD_USER_EXPENSE,
+  ADD_USER_INCOME,
   MODIFY_USER_EXPENSE,
+  MODIFY_USER_INCOME,
 } from "./types";
 import UserService from "../services/user.service";
 
@@ -72,7 +74,34 @@ export const addExpense = (expenses) => (dispatch) => {
     (response) => {
       dispatch({
         type: ADD_USER_EXPENSE,
-        payload: response.data.expense,
+        payload: response.data.expenses,
+      });
+      return Promise.resolve();
+    },
+    (error) => {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      dispatch({
+        type: SET_MESSAGE,
+        payload: message,
+      });
+
+      return Promise.reject();
+    }
+  );
+};
+
+export const addIncome = (income) => (dispatch) => {
+  return UserService.postUserAddIncome(income).then(
+    (response) => {
+      dispatch({
+        type: ADD_USER_INCOME,
+        payload: response.data.incomes,
       });
       return Promise.resolve();
     },
@@ -105,7 +134,40 @@ export const modifyExpense =
       (response) => {
         dispatch({
           type: MODIFY_USER_EXPENSE,
-          payload: response.data.expense[0],
+          payload: response.data.expenses[0],
+        });
+        return Promise.resolve();
+      },
+      (error) => {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+
+        dispatch({
+          type: SET_MESSAGE,
+          payload: message,
+        });
+
+        return Promise.reject();
+      }
+    );
+  };
+
+export const modifyIncome =
+  (income, del = false) =>
+  (dispatch) => {
+    const payload = {
+      income,
+      delete: del,
+    };
+    return UserService.postModifyIncome(payload).then(
+      (response) => {
+        dispatch({
+          type: MODIFY_USER_INCOME,
+          payload: response.data.incomes[0],
         });
         return Promise.resolve();
       },
