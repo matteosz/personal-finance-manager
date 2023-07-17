@@ -1,8 +1,5 @@
 const Income = () => {
-    return (
-        <>
-        </>
-    )
-}
+  return <></>;
+};
 
 export default Income;

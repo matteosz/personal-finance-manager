@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { CURRENCIES, convertCurrency } from "../objects/Currency";
+import { convertCurrency } from "../objects/Currency";
+import { CURRENCIES } from "../common/constants";
 import { setupUser } from "../actions/user";
 
-import * as FaIcons from 'react-icons/fa'
+import * as FaIcons from "react-icons/fa";
 import "./ComponentsStyles.css";
 import { clearMessage } from "../actions/message";
 
@@ -36,10 +37,7 @@ const Setup = () => {
   };
 
   const handleAddEntry = () => {
-    setEntries((prevEntries) => [
-      ...prevEntries,
-      { amount: "", currency: "" }
-    ]);
+    setEntries((prevEntries) => [...prevEntries, { amount: "", currency: "" }]);
   };
 
   const handleRemoveEntry = (index) => {
@@ -117,7 +115,7 @@ const Setup = () => {
                   <div>
                     <button
                       type="button"
-                      style={{ float: "right", marginTop: "10px"}}
+                      style={{ float: "right", marginTop: "10px" }}
                       className="btn btn-danger"
                       onClick={() => handleRemoveEntry(index)}
                     >
@@ -129,22 +127,30 @@ const Setup = () => {
               </div>
             ))}
             <div>
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ marginTop: "30px"}}
-              onClick={handleAddEntry}
-            >
-              <FaIcons.FaPlus />  Add Entry
-            </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ marginTop: "30px" }}
+                onClick={handleAddEntry}
+              >
+                <FaIcons.FaPlus /> Add Entry
+              </button>
             </div>
             <br />
             <div style={{ position: "relative" }}>
-              <button type="submit" className="btn btn-primary" 
-                style={{ margin: "0", position: "absolute", top: "50%",
-                  left: "50%", msTransform: "translate(-50%, -50%)",
-                  transform: "translate(-50%, -50%)" }} 
-                disabled={loading}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{
+                  margin: "0",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  msTransform: "translate(-50%, -50%)",
+                  transform: "translate(-50%, -50%)",
+                }}
+                disabled={loading}
+              >
                 {loading ? <div className="spinner"></div> : "Set up"}
               </button>
             </div>

@@ -1,22 +1,26 @@
 package com.pfm.sbjwt.controllers;
 
-import static com.pfm.sbjwt.security.jwt.AuthTokenFilter.parseJwt;
-
 import com.pfm.sbjwt.components.ExchangeRateUpdater;
 import com.pfm.sbjwt.models.ExchangeRate;
 import com.pfm.sbjwt.models.Expense;
+import com.pfm.sbjwt.models.Income;
 import com.pfm.sbjwt.models.NetWorth;
 import com.pfm.sbjwt.models.User;
 import com.pfm.sbjwt.payload.request.AddExpenseRequest;
+import com.pfm.sbjwt.payload.request.AddIncomeRequest;
 import com.pfm.sbjwt.payload.request.ModifyExpenseRequest;
+import com.pfm.sbjwt.payload.request.ModifyIncomeRequest;
 import com.pfm.sbjwt.payload.request.SetupRequest;
 import com.pfm.sbjwt.payload.response.ExpenseResponse;
+import com.pfm.sbjwt.payload.response.IncomeResponse;
 import com.pfm.sbjwt.payload.response.MessageResponse;
 import com.pfm.sbjwt.payload.response.SetupResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
+import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
 import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
 import com.pfm.sbjwt.repository.ExpenseRepository;
+import com.pfm.sbjwt.repository.IncomeRepository;
 import com.pfm.sbjwt.repository.NetWorthRepository;
 import com.pfm.sbjwt.repository.UserRepository;
 import com.pfm.sbjwt.security.jwt.JwtUtils;
@@ -42,28 +46,45 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test")
 public class TestController {
 
-  @Autowired ExchangeRateService exchangeRateService;
+  private final ExchangeRateService exchangeRateService;
 
-  @Autowired ExchangeRateUpdater exchangeRateUpdater;
+  private final ExchangeRateUpdater exchangeRateUpdater;
 
-  @Autowired JwtUtils jwtUtils;
+  private final JwtUtils jwtUtils;
 
-  @Autowired UserRepository userRepository;
+  private final UserRepository userRepository;
 
-  @Autowired NetWorthRepository netWorthRepository;
+  private final NetWorthRepository netWorthRepository;
 
-  @Autowired ExpenseRepository expenseRepository;
+  private final ExpenseRepository expenseRepository;
+
+  private final IncomeRepository incomeRepository;
+
+  @Autowired
+  public TestController(
+      ExchangeRateService exchangeRateService,
+      ExchangeRateUpdater exchangeRateUpdater,
+      JwtUtils jwtUtils,
+      UserRepository userRepository,
+      NetWorthRepository netWorthRepository,
+      ExpenseRepository expenseRepository,
+      IncomeRepository incomeRepository) {
+    this.exchangeRateService = exchangeRateService;
+    this.exchangeRateUpdater = exchangeRateUpdater;
+    this.jwtUtils = jwtUtils;
+    this.userRepository = userRepository;
+    this.netWorthRepository = netWorthRepository;
+    this.expenseRepository = expenseRepository;
+    this.incomeRepository = incomeRepository;
+  }
 
   @GetMapping("/user")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userAccess(HttpServletRequest request) {
-    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
-    // Find the user content
-    Optional<User> optUser = userRepository.findByUsername(username);
-    if (optUser.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find any data!"));
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
-    User user = optUser.get();
 
     NetWorth netWorth = user.getNetWorth();
     LocalDate startDate = netWorth == null ? LocalDate.of(2000, 1, 1) : netWorth.getStartDate();
@@ -85,17 +106,15 @@ public class TestController {
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userSetup(
       @Valid @RequestBody SetupRequest setupRequest, HttpServletRequest request) {
-    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
-    BigDecimal amount = BigDecimal.valueOf(setupRequest.getAmount());
-
-    Optional<User> user = userRepository.findByUsername(username);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user!"));
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
+    BigDecimal amount = BigDecimal.valueOf(setupRequest.getAmount());
     // Set the amount for the username
     LocalDate date = LocalDate.now();
-    NetWorth netWorth = new NetWorth(user.get(), amount, date);
+    NetWorth netWorth = new NetWorth(user, amount, date);
     netWorthRepository.save(netWorth);
 
     return ResponseEntity.ok(new SetupResponse(new NetWorthNetwork(netWorth)));
@@ -103,33 +122,40 @@ public class TestController {
 
   @PostMapping("/user/expense/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> userExpense(
+  public ResponseEntity<?> userExpenseAdd(
       @Valid @RequestBody AddExpenseRequest addExpenseRequest, HttpServletRequest request) {
-    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
-
-    Optional<User> user = userRepository.findByUsername(username);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user!"));
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
     // Get the expense from the request
-    Expense expense = addExpenseRequest.buildExpense(user.get());
+    Expense expense = addExpenseRequest.buildExpense(user);
     expenseRepository.save(expense);
 
     return ResponseEntity.ok(new ExpenseResponse(new ExpenseNetwork(expense)));
   }
 
-  @PostMapping("/user/expense/modify")
+  @PostMapping("/user/income/add")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> userExpense(
-      @Valid @RequestBody ModifyExpenseRequest modifyExpenseRequest, HttpServletRequest request) {
-    String username = jwtUtils.getUserNameFromJwtToken(parseJwt(request));
-
-    Optional<User> user = userRepository.findByUsername(username);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user!"));
+  public ResponseEntity<?> userIncomeAdd(
+      @Valid @RequestBody AddIncomeRequest addIncomeRequest, HttpServletRequest request) {
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
+    // Get the expense from the request
+    Income income = addIncomeRequest.buildIncome(user);
+    incomeRepository.save(income);
+
+    return ResponseEntity.ok(new IncomeResponse(new IncomeNetwork(income)));
+  }
+
+  @PostMapping("/user/expense/modify")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userExpenseModify(
+      @Valid @RequestBody ModifyExpenseRequest modifyExpenseRequest) {
     ExpenseNetwork expense;
     if (modifyExpenseRequest.getDelete()) {
       Long id = modifyExpenseRequest.getExpense().getId();
@@ -150,15 +176,37 @@ public class TestController {
     return ResponseEntity.ok(new ExpenseResponse(expense));
   }
 
-  @GetMapping("/mod")
-  @PreAuthorize("hasRole('MODERATOR')")
-  public String moderatorAccess() {
-    return null;
+  @PostMapping("/user/income/modify")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userIncomeModify(
+      @Valid @RequestBody ModifyIncomeRequest modifyIncomeRequest) {
+    IncomeNetwork income;
+    if (modifyIncomeRequest.getDelete()) {
+      Long id = modifyIncomeRequest.getIncome().getId();
+      incomeRepository.removeIncomeById(id);
+      income = new IncomeNetwork(id);
+    } else {
+      income = modifyIncomeRequest.getIncome();
+      incomeRepository.modifyIncomeById(
+          income.getId(),
+          income.getDate(),
+          income.getCurrencyCode(),
+          income.getCategory(),
+          income.getSubCategory(),
+          income.getDescription(),
+          income.getAmount());
+    }
+
+    return ResponseEntity.ok(new IncomeResponse(income));
   }
 
-  @GetMapping("/admin")
-  @PreAuthorize("hasRole('ADMIN')")
-  public String adminAccess() {
-    return null;
+  private User getUserFromRequest(HttpServletRequest request) {
+    String username = jwtUtils.getUserNameFromJwtToken(request);
+
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      return null;
+    }
+    return user.get();
   }
 }

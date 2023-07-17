@@ -6,7 +6,7 @@ import {
   LOGOUT,
   SET_MESSAGE,
 } from "./types";
-  
+
 import AuthService from "../services/auth.service";
 import { clearUser } from "./user";
 

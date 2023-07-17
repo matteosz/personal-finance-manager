@@ -1,5 +1,7 @@
 package com.pfm.sbjwt.security.jwt;
 
+import static com.pfm.sbjwt.security.jwt.JwtUtils.parseJwt;
+
 import com.pfm.sbjwt.security.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -45,15 +46,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     } catch (Exception e) {
       logger.error("Cannot set user authentication", e);
     }
-  }
-
-  public static String parseJwt(HttpServletRequest request) {
-    String headerAuth = request.getHeader("Authorization");
-
-    if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-      return headerAuth.substring(7);
-    }
-
-    return null;
   }
 }

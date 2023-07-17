@@ -8,11 +8,17 @@ const getUserBoard = () => {
 };
 
 const postUserSetup = (amount) => {
-  return axios.post(API_URL + "user/setup", { amount }, { headers: authHeader() });
+  return axios.post(
+    API_URL + "user/setup",
+    { amount },
+    { headers: authHeader() }
+  );
 };
 
 const postUserAddExpense = (expense) => {
-  return axios.post(API_URL + "user/expense/add", expense, { headers: authHeader() });
+  return axios.post(API_URL + "user/expense/add", expense, {
+    headers: authHeader(),
+  });
 };
 
 const postModifyExpense = (expense) => {

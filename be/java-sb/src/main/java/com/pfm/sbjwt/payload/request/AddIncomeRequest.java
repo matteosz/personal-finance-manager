@@ -1,6 +1,6 @@
 package com.pfm.sbjwt.payload.request;
 
-import com.pfm.sbjwt.models.Expense;
+import com.pfm.sbjwt.models.Income;
 import com.pfm.sbjwt.models.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class AddExpenseRequest {
+public class AddIncomeRequest {
 
   @NotBlank private String date;
 
@@ -28,12 +28,12 @@ public class AddExpenseRequest {
 
   @NotNull private Float amount;
 
-  public AddExpenseRequest() {
+  public AddIncomeRequest() {
     // Public empty constructor
   }
 
-  public Expense buildExpense(User user) {
-    return new Expense(
+  public Income buildIncome(User user) {
+    return new Income(
         user,
         LocalDate.parse(date),
         currencyCode,

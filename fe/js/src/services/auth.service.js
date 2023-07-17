@@ -30,9 +30,9 @@ const logout = () => {
 };
 
 const service = {
-    register,
-    login,
-    logout,
+  register,
+  login,
+  logout,
 };
 
 export default service;

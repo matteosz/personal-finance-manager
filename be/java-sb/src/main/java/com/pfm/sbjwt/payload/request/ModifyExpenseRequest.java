@@ -9,6 +9,10 @@ public class ModifyExpenseRequest {
 
   @NotNull private ExpenseNetwork expense;
 
+  public ModifyExpenseRequest() {
+    // Public empty constructor
+  }
+
   public Boolean getDelete() {
     return delete;
   }

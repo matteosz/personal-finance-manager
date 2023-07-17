@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, useNavigate  } from 'react-router-dom';
+import { Navigate, useNavigate } from "react-router-dom";
 
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
@@ -28,8 +28,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { isLoggedIn } = useSelector(state => state.auth);
-  const { message } = useSelector(state => state.message);
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { message } = useSelector((state) => state.message);
 
   const dispatch = useDispatch();
 
@@ -71,7 +71,6 @@ const Login = () => {
   return (
     <div className="col-md-12">
       <div className="card card-container">
-        
         <Form onSubmit={handleLogin} ref={form}>
           <div className="form-group">
             <label htmlFor="username">Username</label>
@@ -106,10 +105,12 @@ const Login = () => {
               )}
               <span>Login</span>
             </button>
-            
-            <a href="/register" className="text-right">Sign up</a>
+
+            <a href="/register" className="text-right">
+              Sign up
+            </a>
           </div>
-          
+
           {message && (
             <div className="form-group">
               <br></br>

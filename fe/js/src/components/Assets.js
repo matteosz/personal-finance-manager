@@ -1,8 +1,5 @@
 const Assets = () => {
-    return (
-        <>
-        </>
-    )
-}
+  return <></>;
+};
 
 export default Assets;

@@ -6,25 +6,42 @@ import java.time.LocalDate;
 
 public class IncomeNetwork {
 
-  private final LocalDate date;
+  private Long id;
+  private LocalDate date;
 
-  private final String currencyCode;
+  private String currencyCode;
 
-  private final String category;
+  private String category;
 
-  private final String subCategory;
+  private String subCategory;
 
-  private final String description;
+  private String description;
 
-  private final BigDecimal amount;
+  private BigDecimal amount;
+
+  private Boolean toBeDeleted;
+
+  public IncomeNetwork() {
+    // Public empty constructor
+  }
+
+  public IncomeNetwork(Long id) {
+    this.id = id;
+    toBeDeleted = true;
+  }
 
   public IncomeNetwork(Income income) {
+    id = income.getId();
     date = income.getTimestamp();
     currencyCode = income.getCurrencyCode();
     category = income.getCategory();
     subCategory = income.getSubCategory();
     description = income.getDescription();
     amount = income.getAmount();
+  }
+
+  public Long getId() {
+    return id;
   }
 
   public LocalDate getDate() {
@@ -49,5 +66,9 @@ public class IncomeNetwork {
 
   public BigDecimal getAmount() {
     return amount;
+  }
+
+  public Boolean getToBeDeleted() {
+    return toBeDeleted;
   }
 }

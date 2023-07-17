@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import Login from "./components/Login";
@@ -19,15 +19,14 @@ import EventBus from "./common/EventBus";
 import { logout } from "./actions/auth";
 import { clearMessage } from "./actions/message";
 import { getUsercontent } from "./actions/user";
-import { FormattedDate } from "./objects/FormattedDate"
+import { FormattedDate } from "./objects/FormattedDate";
 import { setGlobalFinancialState } from "./actions/global";
 import { convertCurrency } from "./objects/Currency";
-
-const MONTHS_FROM_MS = 30 * 24 * 60 * 60 * 1000;
+import { MONTHS_FROM_MS } from "./common/constants";
 
 const App = () => {
-  const { user: currentUser } = useSelector(state => state.auth);
-  const { user: userData } = useSelector(state => state.user);
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const { user: userData } = useSelector((state) => state.user);
 
   const [userContentLoaded, setUserContentLoaded] = useState(false);
 
@@ -38,7 +37,7 @@ const App = () => {
 
   const logOut = useCallback(() => {
     dispatch(logout());
-    navigate('/login');
+    navigate("/login");
   }, [dispatch, navigate]);
 
   useEffect(() => {
@@ -50,10 +49,9 @@ const App = () => {
   useEffect(() => {
     if (currentUser && !userContentLoaded) {
       setUserContentLoaded(true);
-      dispatch(getUsercontent())
-        .catch(() => {
-          EventBus.dispatch("logout");
-        });
+      dispatch(getUsercontent()).catch(() => {
+        EventBus.dispatch("logout");
+      });
     }
   }, [currentUser, userContentLoaded, dispatch]);
 
@@ -74,7 +72,7 @@ const App = () => {
       const { lastRates, netWorth, expenses, income, assets } = userData;
 
       const startDate = new Date(netWorth.startDate);
-      const currentDate = new Date(); 
+      const currentDate = new Date();
       const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
       const bucketDates = [];
@@ -87,77 +85,94 @@ const App = () => {
       const initialMonth = startDate.getMonth();
       for (let i = 0; i <= maxMonths; ++i) {
         const year = initialYear + Math.floor(i / 12);
-        const month = (initialMonth + i ) % 12;
+        const month = (initialMonth + i) % 12;
 
         const currentMonth = new Date(year, month);
         const formattedDate = FormattedDate(currentMonth);
         bucketDates.push(formattedDate);
 
         const monthExpenses = expenses
-        .filter((expense) => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
-        })
-        .map((expense) => {
-          const currency = expense.currencyCode;
-          const amount = parseFloat(expense.amount);
-          if (currency !== "EUR") {
-            return convertCurrency(lastRates[formattedDate], amount, currency, "EUR");
-          }
-          return amount;
-        })
-        .reduce((a, b) => a + b, .0);
+          .filter((expense) => {
+            const expenseDate = new Date(expense.date);
+            return (
+              expenseDate.getFullYear() === year &&
+              expenseDate.getMonth() === month
+            );
+          })
+          .map((expense) => {
+            const currency = expense.currencyCode;
+            const amount = parseFloat(expense.amount);
+            if (currency !== "EUR") {
+              return convertCurrency(
+                lastRates[formattedDate],
+                amount,
+                currency,
+                "EUR"
+              );
+            }
+            return amount;
+          })
+          .reduce((total, amount) => total + amount, 0.0);
 
         bucketedExpenses.push(monthExpenses);
-  
-        const monthIncome = income.filter((income) => {
-          const incomeDate = new Date(income.date);
-          return incomeDate.getFullYear() === year && incomeDate.getMonth() === month;
-        })
-        .map((income) => {
-          const currency = income.currencyCode;
-          const amount = parseFloat(income.amount);
-          if (currency !== "EUR") {
-            return convertCurrency(lastRates[formattedDate], amount, currency, "EUR");
-          }
-          return amount;
-        })
-        .reduce((a, b) => a + b, .0);
+
+        const monthIncome = income
+          .filter((income) => {
+            const incomeDate = new Date(income.date);
+            return (
+              incomeDate.getFullYear() === year &&
+              incomeDate.getMonth() === month
+            );
+          })
+          .map((income) => {
+            const currency = income.currencyCode;
+            const amount = parseFloat(income.amount);
+            if (currency !== "EUR") {
+              return convertCurrency(
+                lastRates[formattedDate],
+                amount,
+                currency,
+                "EUR"
+              );
+            }
+            return amount;
+          })
+          .reduce((total, amount) => total + amount, 0.0);
 
         bucketedIncome.push(monthIncome);
 
-        const monthAssets = assets.reduce((a, b) => {
-          var priceA = a.pricesByDate[formattedDate];
-          if (priceA === undefined) {
-            priceA = .0;
+        const monthAssets = assets.reduce((total, asset) => {
+          var price = asset.pricesByDate[formattedDate];
+          if (price === undefined) {
+            price = 0.0;
           } else {
-            priceA = convertCurrency(lastRates[formattedDate], parseFloat(priceA), a.currency, "EUR");
+            price = convertCurrency(
+              lastRates[formattedDate],
+              parseFloat(price),
+              asset.currency,
+              "EUR"
+            );
           }
-
-          var priceB = b.pricesByDate[formattedDate];
-          if (priceB === undefined) {
-            priceB = .0;
-          } else {
-            priceB = convertCurrency(lastRates[formattedDate], parseFloat(priceB), b.currency, "EUR");
-          }
-
-          return priceA + priceB;
-        }, .0);
+          return total + price;
+        }, 0.0);
 
         bucketedAssets.push(monthAssets);
 
-        const netSum = netWorth.value + monthIncome - monthExpenses + monthAssets;
+        const netSum =
+          netWorth.value + monthIncome - monthExpenses + monthAssets;
         bucketedNetWorth.push(netSum);
       }
 
-      dispatch(setGlobalFinancialState({ 
-        rates: lastRates,
-        dates: bucketDates,
-        netWorth: bucketedNetWorth,
-        expenses: bucketedExpenses,
-        income: bucketedIncome,
-        assets: bucketedAssets,
-      }));
+      dispatch(
+        setGlobalFinancialState({
+          rates: lastRates,
+          dates: bucketDates,
+          netWorth: bucketedNetWorth,
+          expenses: bucketedExpenses,
+          income: bucketedIncome,
+          assets: bucketedAssets,
+        })
+      );
     }
   }, [userData, dispatch]);
 
@@ -184,7 +199,6 @@ const App = () => {
           <Route path="/assets" element={setupOrElement(<Assets />)} />
         </Routes>
       </div>
-
     </div>
   );
 };
