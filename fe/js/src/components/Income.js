@@ -575,7 +575,7 @@ const Income = () => {
         <Card.Header>
           <Row>
             <Col>
-              <h5>Add income</h5>
+              <h5>Add Income</h5>
             </Col>
             <Col xs="auto">
               {showForm ? (
@@ -745,7 +745,7 @@ const Income = () => {
         <Card.Header>
           <Row>
             <Col>
-              <h5>View and Modify incomes</h5>
+              <h5>View and Modify Incomes</h5>
             </Col>
             <Col xs="auto">
               {showincomes ? (
@@ -1156,7 +1156,7 @@ const Income = () => {
                 data={pieData.chart}
                 height={"500px"}
                 options={{
-                  title: "incomes by category",
+                  title: "Incomes by category",
                   is3D: true,
                 }}
               />
@@ -1213,7 +1213,7 @@ const Income = () => {
                 height={"500px"}
                 options={{
                   title:
-                    "incomes for each sub-category of the selected category",
+                    "Incomes for each sub-category of the selected category",
                   is3D: true,
                 }}
               />
@@ -1260,7 +1260,7 @@ const Income = () => {
                 height={"600px"}
                 width={"100%"}
                 options={{
-                  title: "Report of total incomes by each month",
+                  title: "Report of total income by each month",
                   seriesType: "bars",
                   series: {
                     [Object.keys(CATEGORIES).length]: {

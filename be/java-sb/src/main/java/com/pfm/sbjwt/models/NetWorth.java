@@ -54,4 +54,8 @@ public class NetWorth {
   public LocalDate getStartDate() {
     return startDate;
   }
+
+  public void setValue(BigDecimal value) {
+    this.value = value;
+  }
 }

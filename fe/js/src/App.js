@@ -27,6 +27,7 @@ import { MONTHS_FROM_MS } from "./common/constants";
 const App = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
   const { user: userData } = useSelector((state) => state.user);
+  const { setup } = useSelector((state) => state.global);
 
   const [userContentLoaded, setUserContentLoaded] = useState(false);
 
@@ -41,9 +42,7 @@ const App = () => {
   }, [dispatch, navigate]);
 
   useEffect(() => {
-    if (["/login", "/register", "/home"].includes(location.pathname)) {
-      dispatch(clearMessage()); // clear message when changing location
-    }
+    dispatch(clearMessage()); // clear message when changing location
   }, [dispatch, location]);
 
   useEffect(() => {
@@ -112,7 +111,7 @@ const App = () => {
             }
             return amount;
           })
-          .reduce((total, amount) => total + amount, 0.0);
+          .reduce((total, amount) => total + amount, .0);
 
         bucketedExpenses.push(monthExpenses);
 
@@ -177,7 +176,7 @@ const App = () => {
   }, [userData, dispatch]);
 
   const setupOrElement = (element) => {
-    if (currentUser && userData && !userData.netWorth) {
+    if (currentUser && (setup || (userData && !userData.netWorth))) {
       return <Setup />;
     } else {
       return element;
@@ -186,7 +185,7 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && userData && userData.netWorth && <Sidebar />}
+      {currentUser && !setup && userData && userData.netWorth && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>

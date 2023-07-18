@@ -113,10 +113,17 @@ public class TestController {
     }
 
     BigDecimal amount = BigDecimal.valueOf(setupRequest.getAmount());
-    // Set the amount for the username
-    LocalDate date = LocalDate.now();
-    NetWorth netWorth = new NetWorth(user, amount, date);
-    netWorthRepository.save(netWorth);
+    NetWorth netWorth = user.getNetWorth();
+    if (netWorth != null) {
+      // Delete old net worth
+      netWorthRepository.modifyNetWorthById(netWorth.getId(), netWorth.getStartDate(), amount);
+      netWorth.setValue(amount);
+    } else {
+      // Set the amount for the username
+      LocalDate date = LocalDate.now();
+      netWorth = new NetWorth(user, amount, date);
+      netWorthRepository.save(netWorth);
+    }
 
     return ResponseEntity.ok(new SetupResponse(new NetWorthNetwork(netWorth)));
   }

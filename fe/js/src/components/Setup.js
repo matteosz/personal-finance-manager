@@ -8,15 +8,24 @@ import { setupUser } from "../actions/user";
 import * as FaIcons from "react-icons/fa";
 import "./ComponentsStyles.css";
 import { clearMessage } from "../actions/message";
+import { setSetupState } from "../actions/global";
 
 const Setup = () => {
-  const [entries, setEntries] = useState([{ amount: "", currency: "" }]);
-  const [loading, setLoading] = useState(false);
-
   const { message } = useSelector((state) => state.message);
   const { user: userData } = useSelector((state) => state.user);
+  const { setup } = useSelector((state) => state.global);
+
+  const defEntry = userData.netWorth
+    ? { amount: userData.netWorth.value, currency: "EUR" }
+    : { amount: "", currency: "" };
+  const [entries, setEntries] = useState([defEntry]);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
+
+  const exitSetup = () => {
+    dispatch(setSetupState(false));
+  };
 
   const handleChangeAmount = (e, index) => {
     const { value } = e.target;
@@ -62,10 +71,11 @@ const Setup = () => {
       );
     });
 
-    dispatch(setupUser(entriesEUR.reduce((a, b) => a + b, 0)))
+    dispatch(setupUser(entriesEUR.reduce((a, b) => a + b, 0.0)))
       .then(() => {
         setLoading(false);
         dispatch(clearMessage());
+        dispatch(setSetupState(false));
       })
       .catch(() => {
         setLoading(false);
@@ -76,7 +86,23 @@ const Setup = () => {
     <div className="setup-container">
       <div className="card">
         <div className="card-body">
-          <h2 className="card-title">Account Setup</h2>
+          {!setup ? (
+            <h2 className="card-title">Account Setup</h2>
+          ) : (
+            <div>
+              <h2 className="card-title">Modify your initial Net Worth</h2>
+              <p
+                style={{
+                  cursor: "pointer",
+                  color: "blue",
+                  textDecoration: "underline",
+                }}
+                onClick={exitSetup}
+              >
+                <FaIcons.FaArrowLeft /> Go back
+              </p>
+            </div>
+          )}
           <br />
           <form className="setup-form" onSubmit={handleSubmit}>
             {entries.map((entry, index) => (
