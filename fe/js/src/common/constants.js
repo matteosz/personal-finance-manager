@@ -152,3 +152,17 @@ export const INCOME_CATEGORIES = {
   "Unemployment Benefits": ["State Benefits", "Federal Benefits", "Other"],
   Miscellaneous: ["Other", "Unexpected Income"],
 };
+export const ASSET_CATEGORIES = [
+  "Bonds",
+  "Business Ownership",
+  "Collectibles",
+  "Commodities",
+  "Cryptos",
+  "Foreign Currencies",
+  "Precious Metals",
+  "Real Estate",
+  "Retirement Accounts",
+  "Savings Account",
+  "Stocks",
+  "Other",
+];

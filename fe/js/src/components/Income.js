@@ -1235,7 +1235,7 @@ const Income = () => {
         <Card.Body>
           <Row>
             <Col sm={6} md={4}>
-              <Form.Group controlId="timespanSelect">
+              <Form.Group controlId="timespanSelect2">
                 <Form.Label>Timespan</Form.Label>
                 <Form.Control
                   as="select"

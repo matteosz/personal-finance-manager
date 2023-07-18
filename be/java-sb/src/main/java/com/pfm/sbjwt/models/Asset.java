@@ -27,7 +27,7 @@ public class Asset {
   private User user;
 
   @Column(nullable = false)
-  private LocalDate purchaseDate;
+  private LocalDate date;
 
   @NotBlank
   @Size(min = 3, max = 3)
@@ -40,6 +40,9 @@ public class Asset {
   @Size(max = 100)
   private String description;
 
+  @Size(max = 50)
+  private String identifierCode;
+
   @Column(nullable = false)
   private BigDecimal purchasedAmount;
 
@@ -49,16 +52,18 @@ public class Asset {
 
   public Asset(
       User user,
-      LocalDate purchaseDate,
+      LocalDate date,
       String currencyCode,
       String category,
       String description,
+      String identifierCode,
       BigDecimal purchasedAmount) {
     this.user = user;
-    this.purchaseDate = purchaseDate;
+    this.date = date;
     this.currencyCode = currencyCode;
     this.category = category;
     this.description = description;
+    this.identifierCode = identifierCode;
     this.purchasedAmount = purchasedAmount;
   }
 
@@ -66,8 +71,8 @@ public class Asset {
     return id;
   }
 
-  public LocalDate getPurchaseTimestamp() {
-    return purchaseDate;
+  public LocalDate getDate() {
+    return date;
   }
 
   public String getCurrencyCode() {
@@ -80,6 +85,10 @@ public class Asset {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getIdentifierCode() {
+    return identifierCode;
   }
 
   public BigDecimal getPurchasedAmount() {

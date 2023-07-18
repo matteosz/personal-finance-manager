@@ -67,7 +67,7 @@ const App = () => {
 
   // Compute the global data for the user for each month (global history) every time the data changes
   useEffect(() => {
-    if (userData) {
+    if (userData && userData.netWorth) {
       const { lastRates, netWorth, expenses, income, assets } = userData;
 
       const startDate = new Date(netWorth.startDate);

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class AssetNetwork {
 
-  private final LocalDate purchaseDate;
+  private final LocalDate date;
 
   private final String currencyCode;
 
@@ -15,21 +15,24 @@ public class AssetNetwork {
 
   private final String description;
 
+  private final String identifierCode;
+
   private final BigDecimal purchasedAmount;
 
   private final Map<LocalDate, BigDecimal> pricesByDate;
 
   public AssetNetwork(Asset asset) {
-    purchaseDate = asset.getPurchaseTimestamp();
+    date = asset.getDate();
     currencyCode = asset.getCurrencyCode();
     category = asset.getCategory();
     description = asset.getDescription();
+    identifierCode = asset.getIdentifierCode();
     purchasedAmount = asset.getPurchasedAmount();
     pricesByDate = asset.getPricesByDate();
   }
 
-  public LocalDate getPurchaseDate() {
-    return purchaseDate;
+  public LocalDate getDate() {
+    return date;
   }
 
   public String getCurrencyCode() {
@@ -42,6 +45,10 @@ public class AssetNetwork {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getIdentifierCode() {
+    return identifierCode;
   }
 
   public BigDecimal getPurchasedAmount() {

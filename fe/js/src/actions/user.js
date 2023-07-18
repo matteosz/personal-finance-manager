@@ -8,6 +8,8 @@ import {
   ADD_USER_INCOME,
   MODIFY_USER_EXPENSE,
   MODIFY_USER_INCOME,
+  MODIFY_USER_ASSET,
+  ADD_USER_ASSET,
 } from "./types";
 import UserService from "../services/user.service";
 
@@ -123,6 +125,33 @@ export const addIncome = (income) => (dispatch) => {
   );
 };
 
+export const addAsset = (asset) => (dispatch) => {
+  return UserService.postUserAddAsset(asset).then(
+    (response) => {
+      dispatch({
+        type: ADD_USER_ASSET,
+        payload: response.data.asset,
+      });
+      return Promise.resolve();
+    },
+    (error) => {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      dispatch({
+        type: SET_MESSAGE,
+        payload: message,
+      });
+
+      return Promise.reject();
+    }
+  );
+};
+
 export const modifyExpense =
   (expense, del = false) =>
   (dispatch) => {
@@ -168,6 +197,39 @@ export const modifyIncome =
         dispatch({
           type: MODIFY_USER_INCOME,
           payload: response.data.incomes[0],
+        });
+        return Promise.resolve();
+      },
+      (error) => {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+
+        dispatch({
+          type: SET_MESSAGE,
+          payload: message,
+        });
+
+        return Promise.reject();
+      }
+    );
+  };
+
+  export const modifyAsset =
+  (asset, del = false) =>
+  (dispatch) => {
+    const payload = {
+      asset,
+      delete: del,
+    };
+    return UserService.postModifyAsset(payload).then(
+      (response) => {
+        dispatch({
+          type: MODIFY_USER_ASSET,
+          payload: response.data.asset,
         });
         return Promise.resolve();
       },

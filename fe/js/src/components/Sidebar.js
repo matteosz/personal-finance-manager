@@ -187,7 +187,7 @@ const Sidebar = () => {
         <NavbarRight>
           <CurrencyDropdown
             onChange={(event) => changeCurrency(event.target.value)}
-            defaultValue={"EUR"}
+            defaultValue={selectedCurrency}
           >
             {Object.keys(CURRENCIES).map((currency) => (
               <option key={currency} value={currency}>

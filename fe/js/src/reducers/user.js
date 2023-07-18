@@ -7,6 +7,7 @@ import {
   ADD_USER_ASSET,
   MODIFY_USER_EXPENSE,
   MODIFY_USER_INCOME,
+  MODIFY_USER_ASSET,
 } from "../actions/types";
 
 const initialState = {};
@@ -88,6 +89,25 @@ const userReducer = (state = initialState, action) => {
           assets: [...state.user.assets, action.payload],
         },
       };
+      case MODIFY_USER_ASSET:
+        return {
+          ...state,
+          user: {
+            ...state.user,
+            assets: state.user.assets
+              .map((asset) => {
+                if (asset.id === action.payload.id) {
+                  if (action.payload.toBeDeleted) {
+                    return null;
+                  } else {
+                    return action.payload;
+                  }
+                }
+                return asset;
+              })
+              .filter(Boolean),
+          },
+        };
     case CLEAR_USER:
       return {
         ...state,
