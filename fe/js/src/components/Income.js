@@ -39,7 +39,6 @@ import {
   Currency,
   convertCurrency,
   findMinimumDate,
-  getFirstDate,
 } from "../objects/Currency";
 import { FormattedDate } from "../objects/FormattedDate";
 
@@ -250,7 +249,7 @@ const Income = () => {
   const handleConfirmModification = () => {
     dispatch(modifyIncome(modifiedIncome))
       .then(() => {
-        setSuccessMessage("income modified");
+        setSuccessMessage("Income modified");
         setModifiedIncome(null);
         setIsModified(false);
       })
@@ -267,7 +266,7 @@ const Income = () => {
   const handleDeleteincome = (income) => {
     dispatch(modifyIncome(income, true))
       .then(() => {
-        setSuccessMessage("income deleted");
+        setSuccessMessage("Income deleted");
       })
       .catch(() => {
         setErrorMessage("Error deleting income");
@@ -528,7 +527,7 @@ const Income = () => {
   // General chart update
   useEffect(() => {
     if (globalIncomeData.length > 0) {
-      const timespan = MONTHS_TIMESPAN[chartFilter.timespan];
+      const timespan = MONTHS_TIMESPAN[chartFilter];
       const maxLength = Math.min(timespan, globalIncomeData.length);
       const timespanData = globalIncomeData.slice(-maxLength);
 
@@ -607,7 +606,7 @@ const Income = () => {
                   type="date"
                   name="date"
                   value={incomeForm.date}
-                  min={getFirstDate(userData.lastRates)}
+                  min={userData.initialState.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -930,7 +929,7 @@ const Income = () => {
                             type="date"
                             name="date"
                             value={modifiedIncome.date}
-                            min={getFirstDate(userData.lastRates)}
+                            min={userData.initialState.startDate}
                             onChange={(e) =>
                               setModifiedIncome((previncome) => ({
                                 ...previncome,

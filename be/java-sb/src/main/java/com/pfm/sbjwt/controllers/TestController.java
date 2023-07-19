@@ -5,6 +5,7 @@ import com.pfm.sbjwt.models.Asset;
 import com.pfm.sbjwt.models.ExchangeRate;
 import com.pfm.sbjwt.models.Expense;
 import com.pfm.sbjwt.models.Income;
+import com.pfm.sbjwt.models.InitialState;
 import com.pfm.sbjwt.models.User;
 import com.pfm.sbjwt.payload.request.AddAssetRequest;
 import com.pfm.sbjwt.payload.request.AddExpenseRequest;
@@ -12,22 +13,28 @@ import com.pfm.sbjwt.payload.request.AddIncomeRequest;
 import com.pfm.sbjwt.payload.request.ModifyAssetRequest;
 import com.pfm.sbjwt.payload.request.ModifyExpenseRequest;
 import com.pfm.sbjwt.payload.request.ModifyIncomeRequest;
+import com.pfm.sbjwt.payload.request.SetupRequest;
 import com.pfm.sbjwt.payload.response.AssetResponse;
 import com.pfm.sbjwt.payload.response.ExpenseResponse;
 import com.pfm.sbjwt.payload.response.IncomeResponse;
 import com.pfm.sbjwt.payload.response.MessageResponse;
+import com.pfm.sbjwt.payload.response.SetupResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
 import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
+import com.pfm.sbjwt.payload.response.models.InitialStateNetwork;
 import com.pfm.sbjwt.repository.AssetRepository;
 import com.pfm.sbjwt.repository.ExpenseRepository;
 import com.pfm.sbjwt.repository.IncomeRepository;
+import com.pfm.sbjwt.repository.InitialStateRepository;
 import com.pfm.sbjwt.repository.UserRepository;
 import com.pfm.sbjwt.security.jwt.JwtUtils;
 import com.pfm.sbjwt.services.ExchangeRateService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +61,8 @@ public class TestController {
 
   private final UserRepository userRepository;
 
+  private final InitialStateRepository initialStateRepository;
+
   private final ExpenseRepository expenseRepository;
 
   private final IncomeRepository incomeRepository;
@@ -66,6 +75,7 @@ public class TestController {
       ExchangeRateUpdater exchangeRateUpdater,
       JwtUtils jwtUtils,
       UserRepository userRepository,
+      InitialStateRepository initialStateRepository,
       ExpenseRepository expenseRepository,
       IncomeRepository incomeRepository,
       AssetRepository assetRepository) {
@@ -73,6 +83,7 @@ public class TestController {
     this.exchangeRateUpdater = exchangeRateUpdater;
     this.jwtUtils = jwtUtils;
     this.userRepository = userRepository;
+    this.initialStateRepository = initialStateRepository;
     this.expenseRepository = expenseRepository;
     this.incomeRepository = incomeRepository;
     this.assetRepository = assetRepository;
@@ -93,6 +104,30 @@ public class TestController {
     }
 
     return ResponseEntity.ok(new UserResponse(exchangeRates, user));
+  }
+
+  @PostMapping("/user/setup")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userSetup(
+      @Valid @RequestBody SetupRequest setupRequest, HttpServletRequest request) {
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
+    }
+
+    BigDecimal amount = setupRequest.getValue();
+    LocalDate startDate = setupRequest.getStartDate();
+    InitialState initialState = user.getInitialState();
+    if (initialState != null) {
+      initialStateRepository.modifyInitialStateById(initialState.getId(), startDate, amount);
+      initialState.setValues(startDate, amount);
+    } else {
+      // Set the amount for the username
+      initialState = new InitialState(user, amount, startDate);
+      initialStateRepository.save(initialState);
+    }
+
+    return ResponseEntity.ok(new SetupResponse(new InitialStateNetwork(initialState)));
   }
 
   @PostMapping("/user/expense/add")
@@ -198,7 +233,7 @@ public class TestController {
   @PostMapping("/user/asset/modify")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> userAssetModify(
-      @Valid @RequestBody ModifyAssetRequest modifyAssetRequest, HttpServletRequest request) {
+      @Valid @RequestBody ModifyAssetRequest modifyAssetRequest) {
     AssetNetwork asset;
     if (modifyAssetRequest.getDelete()) {
       Long id = modifyAssetRequest.getAsset().getId();
@@ -213,8 +248,7 @@ public class TestController {
           asset.getCategory(),
           asset.getDescription(),
           asset.getIdentifierCode(),
-          asset.isTracked(),
-          asset.getPurchasedAmount());
+          asset.getAmount());
     }
 
     return ResponseEntity.ok(new AssetResponse(asset));

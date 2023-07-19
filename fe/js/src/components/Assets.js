@@ -32,30 +32,33 @@ import {
   ASSET_CATEGORIES as CATEGORIES,
 } from "../common/constants";
 import { FormattedDate } from "../objects/FormattedDate";
-import { convertCurrency, getFirstDate } from "../objects/Currency";
+import { convertCurrency } from "../objects/Currency";
 
 import "./ComponentsStyles.css";
 
 const today = new Date();
 const defCurrency = "EUR";
 
-const isIdentifierRequired = (category) => {
+const isTracked = (category) => {
   return ["Stocks", "Bonds", "Cryptos"].includes(category);
 };
 
 export const getAssetPrice = (asset, date, rates, currencyTo) => {
-  var price = asset.pricesByDate[date];
-  if (price === undefined) {
-    price = 0.0;
+  let price;
+  if (isTracked(asset.category)) {
+    price = asset.pricesByDate[date];
+    if (price === undefined) {
+      price = asset.amount;
+    }
   } else {
-    price = convertCurrency(
-      rates[date],
-      parseFloat(price),
-      asset.currency,
-      currencyTo
-    );
+    price = asset.amount;
   }
-  return price;
+  return convertCurrency(
+    rates[date],
+    parseFloat(price),
+    asset.currencyCode,
+    currencyTo
+  );
 };
 
 const Asset = () => {
@@ -67,7 +70,7 @@ const Asset = () => {
     category: "",
     identifierCode: "",
     description: "",
-    purchasedAmount: "",
+    amount: "",
   });
   const [filters, setFilters] = useState({
     month: MONTHS[today.getMonth()],
@@ -127,7 +130,6 @@ const Asset = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     dispatch(addAsset(assetForm))
       .then(() => {
         setSuccessMessage("Asset added");
@@ -137,7 +139,7 @@ const Asset = () => {
           category: "",
           identifierCode: "",
           description: "",
-          purchasedAmount: "",
+          amount: "",
         });
         toggleForm(false);
       })
@@ -163,7 +165,7 @@ const Asset = () => {
       category: "",
       identifierCode: "",
       description: "",
-      purchasedAmount: "",
+      amount: "",
     });
   };
 
@@ -228,7 +230,7 @@ const Asset = () => {
   useEffect(() => {
     if (userData) {
       const filteredAssets = userData.assets.filter((asset) => {
-        const { date, currencyCode, category, purchasedAmount } = asset;
+        const { date, currencyCode, category, amount } = asset;
         const {
           month,
           year,
@@ -259,7 +261,7 @@ const Asset = () => {
           return false;
         }
 
-        if (minAmount && parseFloat(purchasedAmount) < parseFloat(minAmount)) {
+        if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
           return false;
         }
 
@@ -345,7 +347,7 @@ const Asset = () => {
                   type="date"
                   name="date"
                   value={assetForm.date}
-                  min={getFirstDate(userData.lastRates)}
+                  min={userData.initialState.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -387,6 +389,22 @@ const Asset = () => {
                 </Form.Control>
               </Form.Group>
 
+              {isTracked(assetForm.category) && (
+                <Form.Group controlId="formIdentifier">
+                  <Form.Label>Identifier Code</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={1}
+                    name="identifier"
+                    value={assetForm.identifierCode}
+                    placeholder="Enter identifier code"
+                    onChange={handleInputChange}
+                    maxLength={50}
+                    required
+                  />
+                </Form.Group>
+              )}
+
               <Form.Group controlId="formDescription">
                 <Form.Label>Description</Form.Label>
                 <Form.Control
@@ -397,21 +415,6 @@ const Asset = () => {
                   placeholder="Enter description"
                   onChange={handleInputChange}
                   maxLength={100}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group controlId="formIdentifier">
-                <Form.Label>Identifier Code</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={1}
-                  name="identifier"
-                  disabled={!isIdentifierRequired(assetForm.category)}
-                  value={assetForm.identifierCode}
-                  placeholder="Enter identifier code"
-                  onChange={handleInputChange}
-                  maxLength={50}
                   required
                 />
               </Form.Group>
@@ -639,7 +642,7 @@ const Asset = () => {
                             type="date"
                             name="date"
                             value={modifiedAsset.date}
-                            min={getFirstDate(userData.lastRates)}
+                            min={userData.initialState.startDate}
                             onChange={(e) =>
                               setModifiedAsset((prevAsset) => ({
                                 ...prevAsset,
@@ -720,7 +723,9 @@ const Asset = () => {
                           asset.category
                         )}
                       </td>
-                      <td>asset.identifierCode</td>
+                      <td>
+                        {asset.identifierCode ? asset.identifierCode : ""}
+                      </td>
                       <td>
                         {isModified && modifiedAsset.id === asset.id ? (
                           <Form.Control

@@ -20,8 +20,8 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
   @Query(
       "UPDATE Asset a SET a.date = :newDate, a.currencyCode = :newCurrencyCode, "
           + "a.category = :newCategory, a.description = :newDescription, "
-          + "a.identifierCode = :newIdentifierCode, a.isTracked = :isTracked,"
-          + "a.purchasedAmount = :newAmount WHERE a.id = :id")
+          + "a.identifierCode = :newIdentifierCode,"
+          + "a.amount = :newAmount WHERE a.id = :id")
   void modifyAssetById(
       Long id,
       LocalDate newDate,
@@ -29,6 +29,5 @@ public interface AssetRepository extends JpaRepository<Asset, Long> {
       String newCategory,
       String newDescription,
       String newIdentifierCode,
-      Boolean isTracked,
       BigDecimal newAmount);
 }

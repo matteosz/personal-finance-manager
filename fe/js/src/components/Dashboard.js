@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [timespan, setTimespan] = useState("3M");
 
   const [plottedNetWorthData, setPlottedNetWorthData] = useState([]);
-  const [plottedAssetsData, setPlottedAssetsData] = useState([]);
 
   // Compute the data to be plotted as a slice of the global history whenever the timespan changes
   useEffect(() => {
@@ -104,15 +103,6 @@ const Dashboard = () => {
           name: "Net Worth",
         },
       ]);
-      setPlottedAssetsData([
-        {
-          x: timespanDates,
-          y: timespanAssetsData,
-          type: "scatter",
-          mode: "lines+markers",
-          name: "Assets",
-        },
-      ]);
     }
   }, [
     globalDates,
@@ -174,7 +164,7 @@ const Dashboard = () => {
             selectedCurrency,
             true
           )
-        : 0.0;
+        : .0;
     const lastMonthIncome =
       l2 > 0
         ? convertCurrency(
@@ -184,7 +174,7 @@ const Dashboard = () => {
             selectedCurrency,
             true
           )
-        : 0.0;
+        : .0;
 
     return (
       <Card>
@@ -230,8 +220,8 @@ const Dashboard = () => {
                 selectedCurrency
               )
             )
-            .reduce((tot, x) => tot + x, 0.0)
-        : 0.0;
+            .reduce((tot, x) => tot + x, .0)
+        : .0;
     const last1YearIncome =
       globalIncomeData.length > 0
         ? globalIncomeData
@@ -244,8 +234,8 @@ const Dashboard = () => {
                 selectedCurrency
               )
             )
-            .reduce((tot, x) => tot + x, 0.0)
-        : 0.0;
+            .reduce((tot, x) => tot + x, .0)
+        : .0;
 
     return (
       <Card>
@@ -288,23 +278,6 @@ const Dashboard = () => {
     );
   };
 
-  const renderAssetChart = () => {
-    // Render the asset chart
-    return (
-      <Plot
-        data={plottedAssetsData}
-        layout={{
-          title: "Assets",
-          xaxis: { title: "Date" },
-          yaxis: { title: "Value (" + CURRENCIES[selectedCurrency] + ")" },
-        }}
-        config={{ displayModeBar: false }}
-        useResizeHandler
-        style={{ width: "100%", height: "400px" }}
-      />
-    );
-  };
-
   return (
     <Container className="mt-3">
       {message ? (
@@ -323,10 +296,6 @@ const Dashboard = () => {
                   <Col md={6}>{renderLastMonthCard()}</Col>
                   <Col md={6}>{render1YearCard()}</Col>
                 </Row>
-
-                <div className="asset-chart-container">
-                  {renderAssetChart()}
-                </div>
               </Container>
             </>
           ) : (

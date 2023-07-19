@@ -155,7 +155,6 @@ export const INCOME_CATEGORIES = {
 export const ASSET_CATEGORIES = [
   "Bonds",
   "Business Ownership",
-  "Cash",
   "Collectibles",
   "Commodities",
   "Cryptos",

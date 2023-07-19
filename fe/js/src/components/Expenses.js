@@ -39,7 +39,6 @@ import {
   Currency,
   convertCurrency,
   findMinimumDate,
-  getFirstDate,
 } from "../objects/Currency";
 import { FormattedDate } from "../objects/FormattedDate";
 
@@ -534,7 +533,7 @@ const Expense = () => {
   // General chart update
   useEffect(() => {
     if (globalExpenseData.length > 0) {
-      const timespan = MONTHS_TIMESPAN[chartFilter.timespan];
+      const timespan = MONTHS_TIMESPAN[chartFilter];
       const maxLength = Math.min(timespan, globalExpenseData.length);
       const timespanData = globalExpenseData.slice(-maxLength);
 
@@ -613,7 +612,7 @@ const Expense = () => {
                   type="date"
                   name="date"
                   value={expenseForm.date}
-                  min={getFirstDate(userData.lastRates)}
+                  min={userData.initialState.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -936,7 +935,7 @@ const Expense = () => {
                             type="date"
                             name="date"
                             value={modifiedExpense.date}
-                            min={getFirstDate(userData.lastRates)}
+                            min={userData.initialState.startDate}
                             onChange={(e) =>
                               setModifiedExpense((prevExpense) => ({
                                 ...prevExpense,

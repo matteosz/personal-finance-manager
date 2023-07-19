@@ -45,8 +45,8 @@ export const convertCurrency = (
   }
 
   // Convert the amount
-  const fromRate = exchangeRates[from];
-  const toRate = exchangeRates[to];
+  const fromRate = from === "USD" ? 1. : exchangeRates[from];
+  const toRate = to === "USD" ? 1. : exchangeRates[to];
 
   return (amount / fromRate) * toRate;
 };

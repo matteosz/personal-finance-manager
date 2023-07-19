@@ -7,6 +7,7 @@ import {
   MODIFY_USER_EXPENSE,
   MODIFY_USER_INCOME,
   MODIFY_USER_ASSET,
+  SET_USER_INITIAL_STATE,
 } from "../actions/types";
 
 const initialState = {};
@@ -17,6 +18,14 @@ const userReducer = (state = initialState, action) => {
       return {
         ...state,
         user: action.payload,
+      };
+      case SET_USER_INITIAL_STATE:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          initialState: action.payload,
+        },
       };
     case MODIFY_USER_EXPENSE:
       return {

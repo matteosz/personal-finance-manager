@@ -44,10 +44,7 @@ public class Asset {
   private String identifierCode;
 
   @Column(nullable = false)
-  private Boolean isTracked;
-
-  @Column(nullable = false)
-  private BigDecimal purchasedAmount;
+  private BigDecimal amount;
 
   public Asset() {
     // Empty public constructor
@@ -60,17 +57,14 @@ public class Asset {
       String category,
       String description,
       String identifierCode,
-      Boolean isTracked,
-      Float purchasedAmount) {
+      Float amount) {
     this.user = user;
     this.date = LocalDate.parse(date);
-    ;
     this.currencyCode = currencyCode;
     this.category = category;
     this.description = description;
     this.identifierCode = identifierCode;
-    this.isTracked = isTracked;
-    this.purchasedAmount = BigDecimal.valueOf(purchasedAmount);
+    this.amount = BigDecimal.valueOf(amount);
   }
 
   public Long getId() {
@@ -97,12 +91,8 @@ public class Asset {
     return identifierCode;
   }
 
-  public BigDecimal getPurchasedAmount() {
-    return purchasedAmount;
-  }
-
-  public Boolean isTracked() {
-    return isTracked;
+  public BigDecimal getAmount() {
+    return amount;
   }
 
   public Map<LocalDate, BigDecimal> getPricesByDate() {

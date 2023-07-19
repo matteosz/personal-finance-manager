@@ -12,6 +12,7 @@ import Dashboard from "./components/Dashboard";
 import Expense from "./components/Expenses";
 import Income from "./components/Income";
 import Assets, { getAssetPrice } from "./components/Assets";
+import Setup from "./components/Setup";
 
 import EventBus from "./common/EventBus";
 
@@ -20,12 +21,13 @@ import { clearMessage } from "./actions/message";
 import { getUsercontent } from "./actions/user";
 import { FormattedDate } from "./objects/FormattedDate";
 import { setGlobalFinancialState } from "./actions/global";
-import { convertCurrency, findMinimumDate } from "./objects/Currency";
+import { convertCurrency } from "./objects/Currency";
 import { MONTHS_FROM_MS } from "./common/constants";
 
 const App = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
   const { user: userData } = useSelector((state) => state.user);
+  const { setup } = useSelector((state) => state.global);
 
   const [userContentLoaded, setUserContentLoaded] = useState(false);
 
@@ -64,16 +66,12 @@ const App = () => {
 
   // Compute the global data for the user for each month (global history) every time the data changes
   useEffect(() => {
-    if (!userData) {
+    if (!userData || !userData.initialState) {
       return;
     }
-    const { lastRates, expenses, income, assets } = userData;
+    const { lastRates, expenses, income, assets, initialState } = userData;
 
-    const start = findMinimumDate(expenses, income, assets);
-    if (start === null) {
-      return;
-    }
-    const startDate = new Date(start);
+    const startDate = new Date(initialState.startDate);
     const currentDate = new Date();
     const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
@@ -85,6 +83,7 @@ const App = () => {
 
     const initialYear = startDate.getFullYear();
     const initialMonth = startDate.getMonth();
+    let netSum = initialState.value;
     for (let i = 0; i <= maxMonths; ++i) {
       const year = initialYear + Math.floor(i / 12);
       const month = (initialMonth + i) % 12;
@@ -145,8 +144,8 @@ const App = () => {
       }, 0.0);
       bucketedAssets.push(monthAssets);
 
-      const netSum = monthIncome - monthExpenses + monthAssets;
-      bucketedNetWorth.push(netSum);
+      netSum += monthIncome - monthExpenses;
+      bucketedNetWorth.push(netSum + monthAssets);
     }
 
     dispatch(
@@ -161,19 +160,29 @@ const App = () => {
     );
   }, [userData, dispatch]);
 
+  const setupOrElement = (element) => {
+    if (currentUser && (setup || (userData && !userData.initialState))) {
+      return <Setup />;
+    } else {
+      return element;
+    }
+  };
+
   return (
     <div>
-      {currentUser && <Sidebar />}
+      {currentUser && !setup && userData && userData.initialState && (
+        <Sidebar />
+      )}
 
       <div className="container mt-3">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/home" element={<Dashboard />} />
-          <Route path="/expenses" element={<Expense />} />
-          <Route path="/income" element={<Income />} />
-          <Route path="/assets" element={<Assets />} />
+          <Route path="/home" element={setupOrElement(<Dashboard />)} />
+          <Route path="/expenses" element={setupOrElement(<Expense />)} />
+          <Route path="/income" element={setupOrElement(<Income />)} />
+          <Route path="/assets" element={setupOrElement(<Assets />)} />
         </Routes>
       </div>
     </div>

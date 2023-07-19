@@ -7,10 +7,10 @@ const getUserBoard = () => {
   return axios.get(API_URL + "user", { headers: authHeader() });
 };
 
-const postUserSetup = (amount) => {
+const postUserSetup = (amount, date) => {
   return axios.post(
     API_URL + "user/setup",
-    { amount },
+    { value: amount, startDate: date },
     { headers: authHeader() }
   );
 };

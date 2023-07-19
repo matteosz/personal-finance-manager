@@ -5,6 +5,7 @@ import com.pfm.sbjwt.models.User;
 import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
+import com.pfm.sbjwt.payload.response.models.InitialStateNetwork;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -21,10 +22,13 @@ public class UserResponse {
 
   private final List<AssetNetwork> assets;
 
+  private final InitialStateNetwork initialState;
+
   public UserResponse(List<ExchangeRate> exchangeRates, User user) {
     expenses = user.getExpensesNetwork();
     income = user.getIncomeNetwork();
     assets = user.getAssetsNetwork();
+    initialState = user.getInitialStateNetwork();
 
     for (ExchangeRate exchangeRate : exchangeRates) {
       LocalDate date = exchangeRate.getTimestamp();
@@ -53,5 +57,9 @@ public class UserResponse {
 
   public List<AssetNetwork> getAssets() {
     return assets;
+  }
+
+  public InitialStateNetwork getInitialState() {
+    return initialState;
   }
 }

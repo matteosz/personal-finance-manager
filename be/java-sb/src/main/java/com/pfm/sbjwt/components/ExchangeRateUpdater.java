@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ExchangeRateUpdater {
-  private static final Set<String> FILTER = Set.of("EUR", "CHF", "USD", "GBP");
+  private static final Set<String> FILTER = Set.of("EUR", "CHF", "GBP");
 
   private final ExchangeRateService exchangeRateService;
 

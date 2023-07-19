@@ -36,7 +36,7 @@ public class ExchangeRateService {
   }
 
   public List<ExchangeRate> getRates() {
-    return exchangeRateRepository.getRates();
+    return exchangeRateRepository.findAll();
   }
 
   @NotNull

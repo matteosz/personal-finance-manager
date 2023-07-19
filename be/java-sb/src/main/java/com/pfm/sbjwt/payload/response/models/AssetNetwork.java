@@ -18,9 +18,7 @@ public class AssetNetwork {
 
   private String identifierCode;
 
-  private Boolean isTracked;
-
-  private BigDecimal purchasedAmount;
+  private BigDecimal amount;
 
   private Map<LocalDate, BigDecimal> pricesByDate;
 
@@ -41,8 +39,7 @@ public class AssetNetwork {
     category = asset.getCategory();
     description = asset.getDescription();
     identifierCode = asset.getIdentifierCode();
-    isTracked = asset.isTracked();
-    purchasedAmount = asset.getPurchasedAmount();
+    amount = asset.getAmount();
     pricesByDate = asset.getPricesByDate();
   }
 
@@ -70,12 +67,8 @@ public class AssetNetwork {
     return identifierCode;
   }
 
-  public Boolean isTracked() {
-    return isTracked;
-  }
-
-  public BigDecimal getPurchasedAmount() {
-    return purchasedAmount;
+  public BigDecimal getAmount() {
+    return amount;
   }
 
   public Map<LocalDate, BigDecimal> getPricesByDate() {

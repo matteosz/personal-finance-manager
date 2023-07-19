@@ -25,8 +25,6 @@ public class AddAssetRequest {
   @Size(max = 50)
   private String identifierCode;
 
-  @NotNull private Boolean isTracked;
-
   @NotNull private Float amount;
 
   public AddAssetRequest() {
@@ -34,8 +32,7 @@ public class AddAssetRequest {
   }
 
   public Asset buildAsset(User user) {
-    return new Asset(
-        user, date, currencyCode, category, description, identifierCode, isTracked, amount);
+    return new Asset(user, date, currencyCode, category, description, identifierCode, amount);
   }
 
   public String getDate() {
@@ -56,10 +53,6 @@ public class AddAssetRequest {
 
   public String getIdentifierCode() {
     return identifierCode;
-  }
-
-  public Boolean isTracked() {
-    return isTracked;
   }
 
   public Float getAmount() {

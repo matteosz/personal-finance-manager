@@ -9,6 +9,7 @@ import {
   MODIFY_USER_INCOME,
   MODIFY_USER_ASSET,
   ADD_USER_ASSET,
+  SET_USER_INITIAL_STATE,
 } from "./types";
 import UserService from "../services/user.service";
 
@@ -32,6 +33,33 @@ export const getUsercontent = () => (dispatch) => {
       dispatch({
         type: SET_USER_CONTENT_FAIL,
       });
+
+      dispatch({
+        type: SET_MESSAGE,
+        payload: message,
+      });
+
+      return Promise.reject();
+    }
+  );
+};
+
+export const setupUser = (amount, date) => (dispatch) => {
+  return UserService.postUserSetup(amount, date).then(
+    (response) => {
+      dispatch({
+        type: SET_USER_INITIAL_STATE,
+        payload: response.data.initialState,
+      });
+      return Promise.resolve();
+    },
+    (error) => {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
 
       dispatch({
         type: SET_MESSAGE,
