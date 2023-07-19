@@ -35,8 +35,8 @@ public class ExchangeRateService {
     exchangeRates.forEach(this::saveExchangeRate);
   }
 
-  public Optional<List<ExchangeRate>> getRatesAfterDate(LocalDate date) {
-    return exchangeRateRepository.findExchangeRatesByTimestampIsGreaterThanEqual(date);
+  public List<ExchangeRate> getRates() {
+    return exchangeRateRepository.getRates();
   }
 
   @NotNull

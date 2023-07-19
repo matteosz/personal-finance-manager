@@ -3,7 +3,6 @@ package com.pfm.sbjwt.models;
 import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
-import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -55,9 +54,6 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Asset> assets = new ArrayList<>();
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private NetWorth netWorth;
-
   public User() {
     // public empty constructor
   }
@@ -100,10 +96,6 @@ public class User {
     return assets;
   }
 
-  public NetWorth getNetWorth() {
-    return netWorth;
-  }
-
   public List<ExpenseNetwork> getExpensesNetwork() {
     return expenses.stream().map(ExpenseNetwork::new).collect(Collectors.toList());
   }
@@ -114,10 +106,6 @@ public class User {
 
   public List<AssetNetwork> getAssetsNetwork() {
     return assets.stream().map(AssetNetwork::new).collect(Collectors.toList());
-  }
-
-  public NetWorthNetwork getNetWorthNetwork() {
-    return netWorth == null ? null : new NetWorthNetwork(netWorth);
   }
 
   public void setRoles(Set<Role> roles) {

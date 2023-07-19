@@ -31,19 +31,31 @@ import {
   MONTHS_CARDINALITY,
   ASSET_CATEGORIES as CATEGORIES,
 } from "../common/constants";
-import { FormattedDate1Month, FormattedDate } from "../objects/FormattedDate";
+import { FormattedDate } from "../objects/FormattedDate";
+import { convertCurrency, getFirstDate } from "../objects/Currency";
 
 import "./ComponentsStyles.css";
 
 const today = new Date();
 const defCurrency = "EUR";
 
-const identifierRequired = [
-  "Stocks", "Bonds", "Cryptos",
-];
-
 const isIdentifierRequired = (category) => {
-  return identifierRequired.includes(category);
+  return ["Stocks", "Bonds", "Cryptos"].includes(category);
+};
+
+export const getAssetPrice = (asset, date, rates, currencyTo) => {
+  var price = asset.pricesByDate[date];
+  if (price === undefined) {
+    price = 0.0;
+  } else {
+    price = convertCurrency(
+      rates[date],
+      parseFloat(price),
+      asset.currency,
+      currencyTo
+    );
+  }
+  return price;
 };
 
 const Asset = () => {
@@ -99,11 +111,10 @@ const Asset = () => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-      setAssetForm((prevAssetForm) => ({
-        ...prevAssetForm,
-        [name]: value,
-      }));
-  
+    setAssetForm((prevAssetForm) => ({
+      ...prevAssetForm,
+      [name]: value,
+    }));
   };
 
   const handleCategoryChange = (event) => {
@@ -334,7 +345,7 @@ const Asset = () => {
                   type="date"
                   name="date"
                   value={assetForm.date}
-                  min={FormattedDate1Month(userData.netWorth.startDate)}
+                  min={getFirstDate(userData.lastRates)}
                   onChange={handleInputChange}
                   required
                 />
@@ -628,7 +639,7 @@ const Asset = () => {
                             type="date"
                             name="date"
                             value={modifiedAsset.date}
-                            min={userData.netWorth.startDate}
+                            min={getFirstDate(userData.lastRates)}
                             onChange={(e) =>
                               setModifiedAsset((prevAsset) => ({
                                 ...prevAsset,
@@ -709,9 +720,7 @@ const Asset = () => {
                           asset.category
                         )}
                       </td>
-                      <td>
-                        asset.identifierCode
-                      </td>
+                      <td>asset.identifierCode</td>
                       <td>
                         {isModified && modifiedAsset.id === asset.id ? (
                           <Form.Control

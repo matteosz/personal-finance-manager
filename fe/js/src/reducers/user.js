@@ -1,7 +1,6 @@
 import {
   CLEAR_USER,
   SET_USER_CONTENT,
-  UPDATE_USER_NW,
   ADD_USER_EXPENSE,
   ADD_USER_INCOME,
   ADD_USER_ASSET,
@@ -18,14 +17,6 @@ const userReducer = (state = initialState, action) => {
       return {
         ...state,
         user: action.payload,
-      };
-    case UPDATE_USER_NW:
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          netWorth: action.payload,
-        },
       };
     case MODIFY_USER_EXPENSE:
       return {
@@ -54,7 +45,7 @@ const userReducer = (state = initialState, action) => {
           expenses: [...state.user.expenses, ...action.payload],
         },
       };
-      case MODIFY_USER_INCOME:
+    case MODIFY_USER_INCOME:
       return {
         ...state,
         user: {
@@ -89,25 +80,25 @@ const userReducer = (state = initialState, action) => {
           assets: [...state.user.assets, action.payload],
         },
       };
-      case MODIFY_USER_ASSET:
-        return {
-          ...state,
-          user: {
-            ...state.user,
-            assets: state.user.assets
-              .map((asset) => {
-                if (asset.id === action.payload.id) {
-                  if (action.payload.toBeDeleted) {
-                    return null;
-                  } else {
-                    return action.payload;
-                  }
+    case MODIFY_USER_ASSET:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          assets: state.user.assets
+            .map((asset) => {
+              if (asset.id === action.payload.id) {
+                if (action.payload.toBeDeleted) {
+                  return null;
+                } else {
+                  return action.payload;
                 }
-                return asset;
-              })
-              .filter(Boolean),
-          },
-        };
+              }
+              return asset;
+            })
+            .filter(Boolean),
+        },
+      };
     case CLEAR_USER:
       return {
         ...state,

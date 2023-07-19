@@ -35,8 +35,13 @@ import {
   MONTHS_FROM_MS,
   MONTHS_TIMESPAN,
 } from "../common/constants";
-import { Currency, convertCurrency } from "../objects/Currency";
-import { FormattedDate1Month, FormattedDate } from "../objects/FormattedDate";
+import {
+  Currency,
+  convertCurrency,
+  findMinimumDate,
+  getFirstDate,
+} from "../objects/Currency";
+import { FormattedDate } from "../objects/FormattedDate";
 
 import "./ComponentsStyles.css";
 
@@ -269,8 +274,9 @@ const Expense = () => {
       });
   };
 
-  const preCalculateChartData = (date, expenses, lastRates) => {
-    const startDate = new Date(date);
+  const preCalculateChartData = (expenses, lastRates) => {
+    const minimumDate = findMinimumDate(expenses);
+    const startDate = minimumDate? new Date(minimumDate) : new Date();
     const currentDate = new Date();
     const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
@@ -356,11 +362,7 @@ const Expense = () => {
   useEffect(() => {
     if (userData) {
       setRates(userData.lastRates);
-      preCalculateChartData(
-        userData.netWorth.startDate,
-        userData.expenses,
-        userData.lastRates
-      );
+      preCalculateChartData(userData.expenses, userData.lastRates);
       // Filter expenses for the table
       const filteredExpenses = userData.expenses.filter((expense) => {
         const { date, currencyCode, category, amount } = expense;
@@ -448,7 +450,7 @@ const Expense = () => {
             "EUR",
             selectedCurrency
           ),
-        0.0
+        .0
       );
 
       const selectedCategory = pieFilter.category;
@@ -611,7 +613,7 @@ const Expense = () => {
                   type="date"
                   name="date"
                   value={expenseForm.date}
-                  min={FormattedDate1Month(userData.netWorth.startDate)}
+                  min={getFirstDate(userData.lastRates)}
                   onChange={handleInputChange}
                   required
                 />
@@ -934,7 +936,7 @@ const Expense = () => {
                             type="date"
                             name="date"
                             value={modifiedExpense.date}
-                            min={userData.netWorth.startDate}
+                            min={getFirstDate(userData.lastRates)}
                             onChange={(e) =>
                               setModifiedExpense((prevExpense) => ({
                                 ...prevExpense,

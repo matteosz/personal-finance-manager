@@ -1,4 +1,4 @@
-import { SET_GLOBAL_FINANCIAL_STATE, SET_SETUP_STATE } from "../actions/types";
+import { SET_GLOBAL_FINANCIAL_STATE } from "../actions/types";
 
 const initialState = {
   finance: {
@@ -9,7 +9,6 @@ const initialState = {
     rates: {},
     dates: [],
   },
-  setup: false,
 };
 
 const globalReducer = (state = initialState, action) => {
@@ -20,11 +19,6 @@ const globalReducer = (state = initialState, action) => {
       return {
         ...state,
         finance: payload,
-      };
-    case SET_SETUP_STATE:
-      return {
-        ...state,
-        setup: payload,
       };
     default:
       return state;

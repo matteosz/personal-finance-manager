@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
 
-  Optional<List<ExchangeRate>> findExchangeRatesByTimestampIsGreaterThanEqual(LocalDate timestamp);
+  @Query("SELECT ExchangeRate FROM ExchangeRate er")
+  List<ExchangeRate> getRates();
 
   @Query("SELECT MAX(er.timestamp) FROM ExchangeRate er")
   Optional<LocalDate> findLatestTimestamp();

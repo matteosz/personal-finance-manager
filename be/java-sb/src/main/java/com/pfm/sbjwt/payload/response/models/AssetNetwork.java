@@ -6,20 +6,34 @@ import java.time.LocalDate;
 import java.util.Map;
 
 public class AssetNetwork {
+  private Long id;
 
-  private final LocalDate date;
+  private LocalDate date;
 
-  private final String currencyCode;
+  private String currencyCode;
 
-  private final String category;
+  private String category;
 
-  private final String description;
+  private String description;
 
-  private final String identifierCode;
+  private String identifierCode;
 
-  private final BigDecimal purchasedAmount;
+  private Boolean isTracked;
 
-  private final Map<LocalDate, BigDecimal> pricesByDate;
+  private BigDecimal purchasedAmount;
+
+  private Map<LocalDate, BigDecimal> pricesByDate;
+
+  private Boolean toBeDeleted;
+
+  public AssetNetwork() {
+    // Public empty constructor
+  }
+
+  public AssetNetwork(Long id) {
+    this.id = id;
+    toBeDeleted = true;
+  }
 
   public AssetNetwork(Asset asset) {
     date = asset.getDate();
@@ -27,8 +41,13 @@ public class AssetNetwork {
     category = asset.getCategory();
     description = asset.getDescription();
     identifierCode = asset.getIdentifierCode();
+    isTracked = asset.isTracked();
     purchasedAmount = asset.getPurchasedAmount();
     pricesByDate = asset.getPricesByDate();
+  }
+
+  public Long getId() {
+    return id;
   }
 
   public LocalDate getDate() {
@@ -51,11 +70,19 @@ public class AssetNetwork {
     return identifierCode;
   }
 
+  public Boolean isTracked() {
+    return isTracked;
+  }
+
   public BigDecimal getPurchasedAmount() {
     return purchasedAmount;
   }
 
   public Map<LocalDate, BigDecimal> getPricesByDate() {
     return pricesByDate;
+  }
+
+  public Boolean getToBeDeleted() {
+    return toBeDeleted;
   }
 }

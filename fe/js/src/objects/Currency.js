@@ -1,4 +1,26 @@
 import { CURRENCIES } from "../common/constants";
+import { FormattedDate1Month } from "./FormattedDate";
+
+export const getFirstDate = (rates) => {
+  const dates = Object.keys(rates);
+  const min = dates.reduce((minDate, currentDate) => {
+    return currentDate < minDate ? currentDate : minDate;
+  });
+  return FormattedDate1Month(min);
+};
+
+export const findMinimumDate = (...lists) => {
+  let minimumDate = null;
+  for (const list of lists) {
+    for (const item of list) {
+      if (item.date && (!minimumDate || item.date < minimumDate)) {
+        minimumDate = item.date;
+      }
+    }
+  }
+
+  return minimumDate;
+};
 
 export const convertCurrency = (
   exchangeRates,

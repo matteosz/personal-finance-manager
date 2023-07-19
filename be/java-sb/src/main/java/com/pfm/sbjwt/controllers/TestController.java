@@ -1,34 +1,33 @@
 package com.pfm.sbjwt.controllers;
 
 import com.pfm.sbjwt.components.ExchangeRateUpdater;
+import com.pfm.sbjwt.models.Asset;
 import com.pfm.sbjwt.models.ExchangeRate;
 import com.pfm.sbjwt.models.Expense;
 import com.pfm.sbjwt.models.Income;
-import com.pfm.sbjwt.models.NetWorth;
 import com.pfm.sbjwt.models.User;
+import com.pfm.sbjwt.payload.request.AddAssetRequest;
 import com.pfm.sbjwt.payload.request.AddExpenseRequest;
 import com.pfm.sbjwt.payload.request.AddIncomeRequest;
+import com.pfm.sbjwt.payload.request.ModifyAssetRequest;
 import com.pfm.sbjwt.payload.request.ModifyExpenseRequest;
 import com.pfm.sbjwt.payload.request.ModifyIncomeRequest;
-import com.pfm.sbjwt.payload.request.SetupRequest;
+import com.pfm.sbjwt.payload.response.AssetResponse;
 import com.pfm.sbjwt.payload.response.ExpenseResponse;
 import com.pfm.sbjwt.payload.response.IncomeResponse;
 import com.pfm.sbjwt.payload.response.MessageResponse;
-import com.pfm.sbjwt.payload.response.SetupResponse;
 import com.pfm.sbjwt.payload.response.UserResponse;
+import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
-import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
+import com.pfm.sbjwt.repository.AssetRepository;
 import com.pfm.sbjwt.repository.ExpenseRepository;
 import com.pfm.sbjwt.repository.IncomeRepository;
-import com.pfm.sbjwt.repository.NetWorthRepository;
 import com.pfm.sbjwt.repository.UserRepository;
 import com.pfm.sbjwt.security.jwt.JwtUtils;
 import com.pfm.sbjwt.services.ExchangeRateService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -55,11 +54,11 @@ public class TestController {
 
   private final UserRepository userRepository;
 
-  private final NetWorthRepository netWorthRepository;
-
   private final ExpenseRepository expenseRepository;
 
   private final IncomeRepository incomeRepository;
+
+  private final AssetRepository assetRepository;
 
   @Autowired
   public TestController(
@@ -67,16 +66,16 @@ public class TestController {
       ExchangeRateUpdater exchangeRateUpdater,
       JwtUtils jwtUtils,
       UserRepository userRepository,
-      NetWorthRepository netWorthRepository,
       ExpenseRepository expenseRepository,
-      IncomeRepository incomeRepository) {
+      IncomeRepository incomeRepository,
+      AssetRepository assetRepository) {
     this.exchangeRateService = exchangeRateService;
     this.exchangeRateUpdater = exchangeRateUpdater;
     this.jwtUtils = jwtUtils;
     this.userRepository = userRepository;
-    this.netWorthRepository = netWorthRepository;
     this.expenseRepository = expenseRepository;
     this.incomeRepository = incomeRepository;
+    this.assetRepository = assetRepository;
   }
 
   @GetMapping("/user")
@@ -87,45 +86,13 @@ public class TestController {
       return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
     }
 
-    NetWorth netWorth = user.getNetWorth();
-    LocalDate startDate = netWorth == null ? LocalDate.of(2000, 1, 1) : netWorth.getStartDate();
-
-    Optional<List<ExchangeRate>> optionExchangeRates =
-        exchangeRateService.getRatesAfterDate(startDate);
-    List<ExchangeRate> rates;
+    List<ExchangeRate> exchangeRates = exchangeRateService.getRates();
     // Force the update of exchange rates if none is present (bootstrapping)
-    if (optionExchangeRates.isEmpty() || optionExchangeRates.get().isEmpty()) {
-      rates = exchangeRateUpdater.updateExchangeRates();
-    } else {
-      rates = optionExchangeRates.get();
+    if (exchangeRates.isEmpty()) {
+      exchangeRates = exchangeRateUpdater.updateExchangeRates();
     }
 
-    return ResponseEntity.ok(new UserResponse(rates, user));
-  }
-
-  @PostMapping("/user/setup")
-  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> userSetup(
-      @Valid @RequestBody SetupRequest setupRequest, HttpServletRequest request) {
-    User user = getUserFromRequest(request);
-    if (user == null) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
-    }
-
-    BigDecimal amount = BigDecimal.valueOf(setupRequest.getAmount());
-    NetWorth netWorth = user.getNetWorth();
-    if (netWorth != null) {
-      // Delete old net worth
-      netWorthRepository.modifyNetWorthById(netWorth.getId(), netWorth.getStartDate(), amount);
-      netWorth.setValue(amount);
-    } else {
-      // Set the amount for the username
-      LocalDate date = LocalDate.now();
-      netWorth = new NetWorth(user, amount, date);
-      netWorthRepository.save(netWorth);
-    }
-
-    return ResponseEntity.ok(new SetupResponse(new NetWorthNetwork(netWorth)));
+    return ResponseEntity.ok(new UserResponse(exchangeRates, user));
   }
 
   @PostMapping("/user/expense/add")
@@ -163,6 +130,21 @@ public class TestController {
     incomeRepository.saveAll(incomes);
 
     return ResponseEntity.ok(new IncomeResponse(incomes));
+  }
+
+  @PostMapping("/user/asset/add")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userAssetAdd(
+      @Valid @RequestBody AddAssetRequest addAssetRequest, HttpServletRequest request) {
+    User user = getUserFromRequest(request);
+    if (user == null) {
+      return ResponseEntity.badRequest().body(new MessageResponse("Can't find user data!"));
+    }
+
+    Asset asset = addAssetRequest.buildAsset(user);
+    assetRepository.save(asset);
+
+    return ResponseEntity.ok(new AssetResponse(new AssetNetwork(asset)));
   }
 
   @PostMapping("/user/expense/modify")
@@ -211,6 +193,31 @@ public class TestController {
     }
 
     return ResponseEntity.ok(new IncomeResponse(income));
+  }
+
+  @PostMapping("/user/asset/modify")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<?> userAssetModify(
+      @Valid @RequestBody ModifyAssetRequest modifyAssetRequest, HttpServletRequest request) {
+    AssetNetwork asset;
+    if (modifyAssetRequest.getDelete()) {
+      Long id = modifyAssetRequest.getAsset().getId();
+      assetRepository.removeAssetById(id);
+      asset = new AssetNetwork(id);
+    } else {
+      asset = modifyAssetRequest.getAsset();
+      assetRepository.modifyAssetById(
+          asset.getId(),
+          asset.getDate(),
+          asset.getCurrencyCode(),
+          asset.getCategory(),
+          asset.getDescription(),
+          asset.getIdentifierCode(),
+          asset.isTracked(),
+          asset.getPurchasedAmount());
+    }
+
+    return ResponseEntity.ok(new AssetResponse(asset));
   }
 
   private User getUserFromRequest(HttpServletRequest request) {

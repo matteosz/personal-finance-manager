@@ -35,8 +35,13 @@ import {
   MONTHS_FROM_MS,
   MONTHS_TIMESPAN,
 } from "../common/constants";
-import { Currency, convertCurrency } from "../objects/Currency";
-import { FormattedDate1Month, FormattedDate } from "../objects/FormattedDate";
+import {
+  Currency,
+  convertCurrency,
+  findMinimumDate,
+  getFirstDate,
+} from "../objects/Currency";
+import { FormattedDate } from "../objects/FormattedDate";
 
 import "./ComponentsStyles.css";
 
@@ -269,8 +274,9 @@ const Income = () => {
       });
   };
 
-  const preCalculateChartData = (date, incomes, lastRates) => {
-    const startDate = new Date(date);
+  const preCalculateChartData = (incomes, lastRates) => {
+    const minimumDate = findMinimumDate(incomes);
+    const startDate = minimumDate? new Date(minimumDate) : new Date();
     const currentDate = new Date();
     const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
@@ -356,11 +362,7 @@ const Income = () => {
   useEffect(() => {
     if (userData) {
       setRates(userData.lastRates);
-      preCalculateChartData(
-        userData.netWorth.startDate,
-        userData.income,
-        userData.lastRates
-      );
+      preCalculateChartData(userData.income, userData.lastRates);
       // Filter incomes for the table
       const filteredincomes = userData.income.filter((income) => {
         const { date, currencyCode, category, amount } = income;
@@ -438,7 +440,7 @@ const Income = () => {
       const timespan = MONTHS_TIMESPAN[pieFilter.timespan];
       const maxLength = Math.min(timespan, globalIncomeData.length);
       const timespanData = globalIncomeData.slice(-maxLength);
-
+      
       const generalTotal = timespanData.reduce(
         (total, monthData) =>
           total +
@@ -448,7 +450,7 @@ const Income = () => {
             "EUR",
             selectedCurrency
           ),
-        0.0
+        .0
       );
 
       const selectedCategory = pieFilter.category;
@@ -605,7 +607,7 @@ const Income = () => {
                   type="date"
                   name="date"
                   value={incomeForm.date}
-                  min={FormattedDate1Month(userData.netWorth.startDate)}
+                  min={getFirstDate(userData.lastRates)}
                   onChange={handleInputChange}
                   required
                 />
@@ -928,7 +930,7 @@ const Income = () => {
                             type="date"
                             name="date"
                             value={modifiedIncome.date}
-                            min={userData.netWorth.startDate}
+                            min={getFirstDate(userData.lastRates)}
                             onChange={(e) =>
                               setModifiedIncome((previncome) => ({
                                 ...previncome,

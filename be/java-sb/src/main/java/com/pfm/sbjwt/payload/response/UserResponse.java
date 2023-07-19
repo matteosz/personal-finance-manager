@@ -5,7 +5,6 @@ import com.pfm.sbjwt.models.User;
 import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
-import com.pfm.sbjwt.payload.response.models.NetWorthNetwork;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
@@ -16,8 +15,6 @@ import java.util.TreeMap;
 public class UserResponse {
   private final Map<LocalDate, Map<String, Float>> lastRates = new TreeMap<>();
 
-  private final NetWorthNetwork netWorth;
-
   private final List<ExpenseNetwork> expenses;
 
   private final List<IncomeNetwork> income;
@@ -25,7 +22,6 @@ public class UserResponse {
   private final List<AssetNetwork> assets;
 
   public UserResponse(List<ExchangeRate> exchangeRates, User user) {
-    netWorth = user.getNetWorthNetwork();
     expenses = user.getExpensesNetwork();
     income = user.getIncomeNetwork();
     assets = user.getAssetsNetwork();
@@ -45,10 +41,6 @@ public class UserResponse {
 
   public Map<LocalDate, Map<String, Float>> getLastRates() {
     return lastRates;
-  }
-
-  public NetWorthNetwork getNetWorth() {
-    return netWorth;
   }
 
   public List<ExpenseNetwork> getExpenses() {

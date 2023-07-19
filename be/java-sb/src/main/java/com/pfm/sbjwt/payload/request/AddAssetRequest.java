@@ -1,13 +1,12 @@
 package com.pfm.sbjwt.payload.request;
 
-import com.pfm.sbjwt.models.Expense;
+import com.pfm.sbjwt.models.Asset;
 import com.pfm.sbjwt.models.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class AddExpenseRequest {
-
+public class AddAssetRequest {
   @NotBlank
   @Size(max = 10)
   private String date;
@@ -20,20 +19,23 @@ public class AddExpenseRequest {
   @Size(max = 20)
   private String category;
 
-  @Size(max = 20)
-  private String subCategory;
-
   @Size(max = 100)
   private String description;
 
+  @Size(max = 50)
+  private String identifierCode;
+
+  @NotNull private Boolean isTracked;
+
   @NotNull private Float amount;
 
-  public AddExpenseRequest() {
+  public AddAssetRequest() {
     // Public empty constructor
   }
 
-  public Expense buildExpense(User user) {
-    return new Expense(user, date, currencyCode, category, subCategory, description, amount);
+  public Asset buildAsset(User user) {
+    return new Asset(
+        user, date, currencyCode, category, description, identifierCode, isTracked, amount);
   }
 
   public String getDate() {
@@ -48,12 +50,16 @@ public class AddExpenseRequest {
     return category;
   }
 
-  public String getSubCategory() {
-    return subCategory;
-  }
-
   public String getDescription() {
     return description;
+  }
+
+  public String getIdentifierCode() {
+    return identifierCode;
+  }
+
+  public Boolean isTracked() {
+    return isTracked;
   }
 
   public Float getAmount() {

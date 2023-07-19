@@ -10,7 +10,6 @@ import { Currency, convertCurrency } from "../objects/Currency";
 import { logout } from "../actions/auth";
 import { setCurrency } from "../actions/currency";
 import { CURRENCIES } from "../common/constants";
-import { setSetupState } from "../actions/global";
 
 const Navbar = styled.div`
   display: flex;
@@ -126,10 +125,6 @@ const Sidebar = () => {
 
   const [netWorth, setNetWorth] = useState(0);
 
-  const modifyNetWorth = () => {
-    dispatch(setSetupState(true));
-  };
-
   // Close the sidebar when clicking outside of it
   const handleOutsideClick = useCallback((event) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -224,12 +219,6 @@ const Sidebar = () => {
                   <br></br>
                   {Currency({ value: netWorth, code: selectedCurrency })}
                 </span>
-                <FaIcons.FaPencilAlt
-                  style={{
-                    cursor: "pointer",
-                  }}
-                  onClick={modifyNetWorth}
-                />
               </MenuNotPageItems>
             );
           }

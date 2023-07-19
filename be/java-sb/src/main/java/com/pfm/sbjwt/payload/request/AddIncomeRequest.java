@@ -10,7 +10,9 @@ import java.time.LocalDate;
 
 public class AddIncomeRequest {
 
-  @NotBlank private String date;
+  @NotBlank
+  @Size(max = 10)
+  private String date;
 
   @NotBlank
   @Size(min = 3, max = 3)

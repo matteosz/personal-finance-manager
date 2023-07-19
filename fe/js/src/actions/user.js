@@ -2,7 +2,6 @@ import {
   SET_USER_CONTENT,
   SET_USER_CONTENT_FAIL,
   SET_MESSAGE,
-  UPDATE_USER_NW,
   CLEAR_USER,
   ADD_USER_EXPENSE,
   ADD_USER_INCOME,
@@ -33,33 +32,6 @@ export const getUsercontent = () => (dispatch) => {
       dispatch({
         type: SET_USER_CONTENT_FAIL,
       });
-
-      dispatch({
-        type: SET_MESSAGE,
-        payload: message,
-      });
-
-      return Promise.reject();
-    }
-  );
-};
-
-export const setupUser = (amount) => (dispatch) => {
-  return UserService.postUserSetup(amount).then(
-    (response) => {
-      dispatch({
-        type: UPDATE_USER_NW,
-        payload: response.data.netWorth,
-      });
-      return Promise.resolve();
-    },
-    (error) => {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
 
       dispatch({
         type: SET_MESSAGE,
@@ -218,7 +190,7 @@ export const modifyIncome =
     );
   };
 
-  export const modifyAsset =
+export const modifyAsset =
   (asset, del = false) =>
   (dispatch) => {
     const payload = {
