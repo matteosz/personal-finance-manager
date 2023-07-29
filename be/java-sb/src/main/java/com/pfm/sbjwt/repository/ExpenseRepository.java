@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
+  Expense getExpenseById(Long id);
+
   @Modifying
   @Transactional
   void removeExpenseById(Long id);

@@ -24,6 +24,8 @@ public class AssetNetwork {
 
   private Boolean toBeDeleted;
 
+  private Boolean toBePurchased;
+
   public AssetNetwork() {
     // Public empty constructor
   }

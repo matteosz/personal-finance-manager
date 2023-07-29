@@ -7,10 +7,11 @@ import styled from "styled-components";
 
 import { SidebarData } from "./SidebarData";
 import { Currency, convertCurrency } from "../objects/Currency";
+import { FormattedDate } from "../objects/FormattedDate";
 import { logout } from "../actions/auth";
 import { setCurrency } from "../actions/currency";
-import { CURRENCIES } from "../common/constants";
-import { setGlobalSetupState } from "../actions/global";
+import { CURRENCIES, MONTHS_FROM_MS } from "../common/constants";
+import { setGlobalSetupState, setGlobalNetWorthState } from "../actions/global";
 
 const Navbar = styled.div`
   display: flex;
@@ -110,15 +111,12 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
+  const { user: userData } = useSelector((state) => state.user);
   const [close, setClose] = useState(false);
+  const [netWorth, setNetWorth] = useState(0);
   const sidebarRef = useRef(null);
 
   const { currency: selectedCurrency } = useSelector((state) => state.currency);
-  const {
-    finance: { rates: globalRates, netWorth: globalNetWorthData },
-  } = useSelector((state) => state.global);
-
-  const [netWorth, setNetWorth] = useState(0);
 
   const showSidebar = (event) => {
     event.preventDefault();
@@ -151,27 +149,43 @@ const Sidebar = () => {
   }, [location]);
 
   useEffect(() => {
-    if (globalNetWorthData && globalNetWorthData.length > 0) {
-      // Calculate and update the net worth based on the user data
-      const nwInEur = globalNetWorthData[globalNetWorthData.length - 1];
-      setNetWorth(
-        convertCurrency(globalRates, nwInEur, "EUR", selectedCurrency, true)
-      );
+    if (!userData || !userData.wallet) {
+      return;
     }
-  }, [globalNetWorthData, globalRates, selectedCurrency]);
+    const startDate = new Date(userData.wallet.startDate);
+    const maxMonths = Math.floor((new Date() - startDate) / MONTHS_FROM_MS);
+
+    const bucketedNetWorth = [];
+    const initialYear = startDate.getFullYear();
+    const initialMonth = startDate.getMonth();
+    for (let i = 0; i <= maxMonths; ++i) {
+      const year = initialYear + Math.floor(i / 12);
+      const month = (initialMonth + i) % 12;
+
+      const currentMonth = new Date(year, month);
+      const formattedDate = FormattedDate(currentMonth);
+
+      const monthNetWorth = Object.entries(
+        userData.wallet.keyPoints[formattedDate]
+      ).reduce((total, [currency, amount]) => {
+        return (
+          total +
+          convertCurrency(
+            userData.lastRates[formattedDate],
+            parseFloat(amount),
+            currency,
+            selectedCurrency
+          )
+        );
+      }, 0.0);
+      bucketedNetWorth.push(monthNetWorth);
+    }
+
+    setNetWorth(bucketedNetWorth[bucketedNetWorth.length - 1]);
+    dispatch(setGlobalNetWorthState(bucketedNetWorth));
+  }, [userData, selectedCurrency, dispatch]);
 
   const changeCurrency = (currency) => {
-    // Convert from old to new currency the amount
-    const newAmount = convertCurrency(
-      globalRates,
-      globalNetWorthData[globalNetWorthData.length - 1],
-      "EUR",
-      currency,
-      true
-    );
-
-    // Update the currency
-    setNetWorth(newAmount);
     dispatch(setCurrency(currency));
   };
 

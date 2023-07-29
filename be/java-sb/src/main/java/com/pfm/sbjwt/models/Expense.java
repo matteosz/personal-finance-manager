@@ -36,7 +36,7 @@ public class Expense {
   private String category;
 
   @NotBlank
-  @Size(max = 20)
+  @Size(max = 30)
   private String subCategory;
 
   @Size(max = 100)

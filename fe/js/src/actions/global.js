@@ -1,11 +1,11 @@
-import { SET_GLOBAL_FINANCIAL_STATE, SET_GLOBAL_SETUP_STATE } from "./types";
-
-export const setGlobalFinancialState = (finance) => ({
-  type: SET_GLOBAL_FINANCIAL_STATE,
-  payload: finance,
-});
+import { SET_GLOBAL_SETUP_STATE, SET_GLOBAL_NETWORTH_STATE } from "./types";
 
 export const setGlobalSetupState = (setup) => ({
   type: SET_GLOBAL_SETUP_STATE,
   payload: setup,
+});
+
+export const setGlobalNetWorthState = (netWorth) => ({
+  type: SET_GLOBAL_NETWORTH_STATE,
+  payload: netWorth,
 });

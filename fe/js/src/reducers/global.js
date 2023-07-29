@@ -1,30 +1,26 @@
-import { SET_GLOBAL_FINANCIAL_STATE, SET_GLOBAL_SETUP_STATE } from "../actions/types";
+import {
+  SET_GLOBAL_SETUP_STATE,
+  SET_GLOBAL_NETWORTH_STATE,
+} from "../actions/types";
 
 const initialState = {
-  finance: {
-    netWorth: null,
-    expenses: [],
-    income: [],
-    assets: [],
-    rates: {},
-    dates: [],
-  },
   setup: false,
+  netWorth: [],
 };
 
 const globalReducer = (state = initialState, action) => {
   const { type, payload } = action;
 
   switch (type) {
-    case SET_GLOBAL_FINANCIAL_STATE:
-      return {
-        ...state,
-        finance: payload,
-      };
-      case SET_GLOBAL_SETUP_STATE:
+    case SET_GLOBAL_SETUP_STATE:
       return {
         ...state,
         setup: payload,
+      };
+    case SET_GLOBAL_NETWORTH_STATE:
+      return {
+        ...state,
+        netWorth: payload,
       };
     default:
       return state;

@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface AssetRepository extends JpaRepository<Asset, Long> {
+  Asset getAssetById(Long id);
+
   @Modifying
   @Transactional
   void removeAssetById(Long id);

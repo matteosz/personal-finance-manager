@@ -3,7 +3,7 @@ package com.pfm.sbjwt.models;
 import com.pfm.sbjwt.payload.response.models.AssetNetwork;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
-import com.pfm.sbjwt.payload.response.models.InitialStateNetwork;
+import com.pfm.sbjwt.payload.response.models.WalletNetwork;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -55,8 +55,11 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Asset> assets = new ArrayList<>();
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private InitialState initialState;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final List<WalletEntry> walletEntries = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final List<WalletOrigin> walletOrigin = new ArrayList<>();
 
   public User() {
     // public empty constructor
@@ -100,8 +103,12 @@ public class User {
     return assets;
   }
 
-  public InitialState getInitialState() {
-    return initialState;
+  public List<WalletEntry> getWalletEntries() {
+    return walletEntries;
+  }
+
+  public List<WalletOrigin> getWalletOrigin() {
+    return walletOrigin;
   }
 
   public List<ExpenseNetwork> getExpensesNetwork() {
@@ -116,8 +123,8 @@ public class User {
     return assets.stream().map(AssetNetwork::new).collect(Collectors.toList());
   }
 
-  public InitialStateNetwork getInitialStateNetwork() {
-    return initialState == null ? null : new InitialStateNetwork(initialState);
+  public WalletNetwork getWalletNetwork() {
+    return walletEntries.isEmpty() ? null : new WalletNetwork(walletEntries);
   }
 
   public void setRoles(Set<Role> roles) {

@@ -59,8 +59,6 @@ const Expense = () => {
     subCategory: "",
     description: "",
     amount: "",
-    isRecurring: false,
-    recurringMonths: 1,
   });
   const [filters, setFilters] = useState({
     month: MONTHS[today.getMonth()],
@@ -150,23 +148,7 @@ const Expense = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Process the recurring expense data if it is set
-    let expensesToAdd = [];
-    if (expenseForm.isRecurring) {
-      const startDate = new Date(expenseForm.date);
-      for (let i = 0; i < expenseForm.recurringMonths; i++) {
-        const currentMonth = new Date(startDate);
-        currentMonth.setMonth(startDate.getMonth() + i);
-        expensesToAdd.push({
-          ...expenseForm,
-          date: FormattedDate(currentMonth),
-        });
-      }
-    } else {
-      expensesToAdd.push(expenseForm);
-    }
-
-    dispatch(addExpense(expensesToAdd))
+    dispatch(addExpense(expenseForm))
       .then(() => {
         setSuccessMessage("Expense added");
         setExpenseForm({
@@ -176,8 +158,6 @@ const Expense = () => {
           subCategory: "",
           description: "",
           amount: "",
-          isRecurring: false,
-          recurringMonths: 1,
         });
         toggleForm(false);
       })
@@ -204,8 +184,6 @@ const Expense = () => {
       subCategory: "",
       description: "",
       amount: "",
-      isRecurring: false,
-      recurringMonths: 1,
     });
   };
 
@@ -275,7 +253,7 @@ const Expense = () => {
 
   const preCalculateChartData = (expenses, lastRates) => {
     const minimumDate = findMinimumDate(expenses);
-    const startDate = minimumDate? new Date(minimumDate) : new Date();
+    const startDate = minimumDate ? new Date(minimumDate) : new Date();
     const currentDate = new Date();
     const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
@@ -359,78 +337,76 @@ const Expense = () => {
   }, [errorMessage]);
 
   useEffect(() => {
-    if (userData) {
-      setRates(userData.lastRates);
-      preCalculateChartData(userData.expenses, userData.lastRates);
-      // Filter expenses for the table
-      const filteredExpenses = userData.expenses.filter((expense) => {
-        const { date, currencyCode, category, amount } = expense;
-        const {
-          month,
-          year,
-          category: filterCategory,
-          currency,
-          minAmount,
-        } = filters;
+    setRates(userData.lastRates);
+    preCalculateChartData(userData.expenses, userData.lastRates);
+    // Filter expenses for the table
+    const filteredExpenses = userData.expenses.filter((expense) => {
+      const { date, currencyCode, category, amount } = expense;
+      const {
+        month,
+        year,
+        category: filterCategory,
+        currency,
+        minAmount,
+      } = filters;
 
-        const objDate = new Date(date);
+      const objDate = new Date(date);
 
-        if (
-          month &&
-          month !== "" &&
-          objDate.getMonth() !== MONTHS_CARDINALITY[month]
-        ) {
-          return false;
-        }
+      if (
+        month &&
+        month !== "" &&
+        objDate.getMonth() !== MONTHS_CARDINALITY[month]
+      ) {
+        return false;
+      }
 
-        if (year && objDate.getFullYear() !== parseInt(year)) {
-          return false;
-        }
+      if (year && objDate.getFullYear() !== parseInt(year)) {
+        return false;
+      }
 
-        if (currency && currencyCode !== currency) {
-          return false;
-        }
+      if (currency && currencyCode !== currency) {
+        return false;
+      }
 
-        if (filterCategory && category !== filterCategory) {
-          return false;
-        }
+      if (filterCategory && category !== filterCategory) {
+        return false;
+      }
 
-        if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
-          return false;
-        }
+      if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
+        return false;
+      }
 
-        return true;
-      });
+      return true;
+    });
 
-      const sortedExpenses = [...filteredExpenses].sort((a, b) => {
-        const fieldA = a[sortBy];
-        const fieldB = b[sortBy];
+    const sortedExpenses = [...filteredExpenses].sort((a, b) => {
+      const fieldA = a[sortBy];
+      const fieldB = b[sortBy];
 
-        // Custom sort for date as string sorting doesn't work
-        if (sortBy === "date") {
-          const dateA = new Date(fieldA);
-          const dateB = new Date(fieldB);
-          if (dateA < dateB) {
-            return sortOrder === "asc" ? -1 : 1;
-          }
-          if (dateA > dateB) {
-            return sortOrder === "asc" ? 1 : -1;
-          }
-          return 0;
-        }
-
-        if (fieldA < fieldB) {
+      // Custom sort for date as string sorting doesn't work
+      if (sortBy === "date") {
+        const dateA = new Date(fieldA);
+        const dateB = new Date(fieldB);
+        if (dateA < dateB) {
           return sortOrder === "asc" ? -1 : 1;
         }
-        if (fieldA > fieldB) {
+        if (dateA > dateB) {
           return sortOrder === "asc" ? 1 : -1;
         }
         return 0;
-      });
+      }
 
-      setExpenseList(sortedExpenses);
-    }
-  }, [userData, filters, sortBy, sortOrder]);
+      if (fieldA < fieldB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+      if (fieldA > fieldB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setExpenseList(sortedExpenses);
+  }, [userData.lastRates, userData.expenses, filters, sortBy, sortOrder]);
 
   // Pie chart update
   useEffect(() => {
@@ -449,7 +425,7 @@ const Expense = () => {
             "EUR",
             selectedCurrency
           ),
-        .0
+        0.0
       );
 
       const selectedCategory = pieFilter.category;
@@ -495,7 +471,7 @@ const Expense = () => {
           "Category",
           "Amount (" + CURRENCIES[selectedCurrency] + ")",
         ]);
-        if (generalTotal !== 0) {
+        if (generalTotal !== 0.0) {
           // See pie chart by category
           Object.entries(categories).forEach(([key, value]) => {
             chart.push([value.name, value.total]);
@@ -510,7 +486,7 @@ const Expense = () => {
           "Amount (" + CURRENCIES[selectedCurrency] + ")",
         ]);
         const categorySum = categories[selectedCategory].total;
-        if (categorySum !== 0) {
+        if (categorySum !== 0.0) {
           Object.entries(subCategories).forEach(([key, value]) => {
             chart.push([value.name, value.total]);
           });
@@ -612,7 +588,7 @@ const Expense = () => {
                   type="date"
                   name="date"
                   value={expenseForm.date}
-                  min={userData.initialState.startDate}
+                  min={userData.wallet.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -701,31 +677,6 @@ const Expense = () => {
                 />
               </Form.Group>
 
-              <Form.Group controlId="formRecurring">
-                <Form.Check
-                  type="checkbox"
-                  label="Recurring Expense"
-                  name="isRecurring"
-                  checked={expenseForm.isRecurring}
-                  onChange={handleInputChange}
-                />
-              </Form.Group>
-
-              {expenseForm.isRecurring && (
-                <Form.Group controlId="formRecurringMonths">
-                  <Form.Label>Recurring for how many months</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="recurringMonths"
-                    min="1"
-                    max="12"
-                    value={expenseForm.recurringMonths}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </Form.Group>
-              )}
-
               <br></br>
               <div style={{ position: "relative" }}>
                 <Button
@@ -809,8 +760,8 @@ const Expense = () => {
                       <Form.Label>Year</Form.Label>
                       <Form.Control
                         type="number"
-                        min="1900"
-                        max="2200"
+                        min="2000"
+                        max="2100"
                         name="year"
                         value={filters.year}
                         onChange={handleFilterChange}
@@ -935,7 +886,7 @@ const Expense = () => {
                             type="date"
                             name="date"
                             value={modifiedExpense.date}
-                            min={userData.initialState.startDate}
+                            min={userData.wallet.startDate}
                             onChange={(e) =>
                               setModifiedExpense((prevExpense) => ({
                                 ...prevExpense,

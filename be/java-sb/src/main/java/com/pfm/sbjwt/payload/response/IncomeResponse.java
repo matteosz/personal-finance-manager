@@ -2,21 +2,28 @@ package com.pfm.sbjwt.payload.response;
 
 import com.pfm.sbjwt.models.Income;
 import com.pfm.sbjwt.payload.response.models.IncomeNetwork;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.pfm.sbjwt.payload.response.models.WalletNetwork;
 
 public class IncomeResponse {
-  private final List<IncomeNetwork> incomes;
+  private final IncomeNetwork income;
 
-  public IncomeResponse(List<Income> incomes) {
-    this.incomes = incomes.stream().map(IncomeNetwork::new).collect(Collectors.toList());
+  private final WalletNetwork wallet;
+
+  public IncomeResponse(Income income, WalletNetwork wallet) {
+    this.income = new IncomeNetwork(income);
+    this.wallet = wallet;
   }
 
-  public IncomeResponse(IncomeNetwork income) {
-    incomes = List.of(income);
+  public IncomeResponse(IncomeNetwork income, WalletNetwork wallet) {
+    this.income = income;
+    this.wallet = wallet;
   }
 
-  public List<IncomeNetwork> getIncomes() {
-    return incomes;
+  public IncomeNetwork getIncome() {
+    return income;
+  }
+
+  public WalletNetwork getWallet() {
+    return wallet;
   }
 }

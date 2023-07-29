@@ -1,10 +1,17 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Alert, Card, Col, Container, Row } from "react-bootstrap";
 import Plot from "react-plotly.js";
+import { Chart } from "react-google-charts";
 
+import { getAssetPrice } from "./Assets";
+import { FormattedDate } from "../objects/FormattedDate";
 import { convertCurrency } from "../objects/Currency";
-import { CURRENCIES, MONTHS_TIMESPAN_NW as MONTHS } from "../common/constants";
+import {
+  CURRENCIES,
+  MONTHS_TIMESPAN_NW as MONTHS,
+  MONTHS_FROM_MS,
+} from "../common/constants";
 
 import "./ComponentsStyles.css";
 
@@ -12,108 +19,142 @@ const Dashboard = () => {
   const { message } = useSelector((state) => state.message);
   const { user: userData } = useSelector((state) => state.user);
   const { currency: selectedCurrency } = useSelector((state) => state.currency);
-  const {
-    finance: {
-      rates: globalRates,
-      dates: globalDates,
-      netWorth: globalNetWorthData,
-      expenses: globalExpenseData,
-      income: globalIncomeData,
-      assets: globalAssetsData,
-    },
-  } = useSelector((state) => state.global);
+  const { netWorth } = useSelector((state) => state.global);
 
-  const prevSelectedCurrency = useRef(selectedCurrency);
-
+  const [currentState, setCurrentState] = useState({});
+  const [currencyDistributionData, setCurrencyDistributionData] = useState([]);
   const [timespan, setTimespan] = useState("3M");
-
   const [plottedNetWorthData, setPlottedNetWorthData] = useState([]);
+
+  useEffect(() => {
+    if (netWorth.length === 0) {
+      return;
+    }
+
+    const timespanMonths = Math.min(MONTHS[timespan], netWorth.length);
+    const timespanNetWorth = netWorth.slice(-timespanMonths);
+
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < timespanMonths; ++i) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i);
+      dates.push(FormattedDate(date));
+    }
+
+    setPlottedNetWorthData([
+      {
+        x: dates.reverse(),
+        y: timespanNetWorth,
+        type: "scatter",
+        mode: "lines+markers",
+        name: "Net Worth",
+      },
+    ]);
+  }, [netWorth, timespan]);
 
   // Compute the data to be plotted as a slice of the global history whenever the timespan changes
   useEffect(() => {
-    if (globalDates.length > 0) {
-      // Compute the data to be plotted based on the selected timespan
-      const timespanMonths = Math.min(MONTHS[timespan], globalDates.length);
-
-      const timespanDates = globalDates.slice(-timespanMonths);
-      var timespanNetWorthData = globalNetWorthData.slice(-timespanMonths);
-      var timespanExpenseData = globalExpenseData.slice(-timespanMonths);
-      var timespanIncomeData = globalIncomeData.slice(-timespanMonths);
-      var timespanAssetsData = globalAssetsData.slice(-timespanMonths);
-
-      // Convert the amounts plotted whenever the selected currency changes
-      const oldSelectedCurrency = prevSelectedCurrency.current;
-      if (oldSelectedCurrency !== selectedCurrency) {
-        prevSelectedCurrency.current = selectedCurrency;
-
-        const newNetworthData = [];
-        const newExpenseData = [];
-        const newIncomeData = [];
-        const newAssetsData = [];
-        for (let i = 0; i < timespanMonths; ++i) {
-          const date = timespanDates[i];
-          const rate = globalRates[date];
-
-          newNetworthData.push(
-            convertCurrency(
-              rate,
-              timespanNetWorthData[i],
-              "EUR",
-              selectedCurrency
-            )
-          );
-          newExpenseData.push(
-            convertCurrency(
-              rate,
-              timespanExpenseData[i],
-              "EUR",
-              selectedCurrency
-            )
-          );
-          newIncomeData.push(
-            convertCurrency(
-              rate,
-              timespanIncomeData[i],
-              "EUR",
-              selectedCurrency
-            )
-          );
-          newAssetsData.push(
-            convertCurrency(
-              rate,
-              timespanAssetsData[i],
-              "EUR",
-              selectedCurrency
-            )
-          );
-        }
-
-        timespanNetWorthData = newNetworthData;
-        timespanExpenseData = newExpenseData;
-        timespanIncomeData = newIncomeData;
-        timespanAssetsData = newAssetsData;
-      }
-
-      setPlottedNetWorthData([
-        {
-          x: timespanDates,
-          y: timespanNetWorthData,
-          type: "scatter",
-          mode: "lines+markers",
-          name: "Net Worth",
-        },
-      ]);
+    if (!userData) {
+      return;
     }
-  }, [
-    globalDates,
-    globalNetWorthData,
-    globalExpenseData,
-    globalIncomeData,
-    globalAssetsData,
-    timespan,
-    globalRates,
-    selectedCurrency,
-  ]);
+    const { lastRates, expenses, income, assets, wallet } = userData;
+
+    const startDate = new Date(wallet.startDate);
+    const maxMonths = Math.floor((new Date() - startDate) / MONTHS_FROM_MS);
+
+    const bucketedExpenses = [];
+    const bucketedIncome = [];
+    const bucketedAssets = [];
+    const initialYear = startDate.getFullYear();
+    const initialMonth = startDate.getMonth();
+    for (let i = 0; i <= maxMonths; ++i) {
+      const year = initialYear + Math.floor(i / 12);
+      const month = (initialMonth + i) % 12;
+
+      const currentMonth = new Date(year, month);
+      const formattedDate = FormattedDate(currentMonth);
+
+      const monthExpenses = expenses
+        .filter((expense) => {
+          const expenseDate = new Date(expense.date);
+          return (
+            expenseDate.getFullYear() === year &&
+            expenseDate.getMonth() === month
+          );
+        })
+        .map((expense) => {
+          return convertCurrency(
+            lastRates[formattedDate],
+            parseFloat(expense.amount),
+            expense.currencyCode,
+            selectedCurrency
+          );
+        })
+        .reduce((total, amount) => total + amount, 0.0);
+      bucketedExpenses.push(monthExpenses);
+
+      const monthIncome = income
+        .filter((income) => {
+          const incomeDate = new Date(income.date);
+          return (
+            incomeDate.getFullYear() === year && incomeDate.getMonth() === month
+          );
+        })
+        .map((income) => {
+          return convertCurrency(
+            lastRates[formattedDate],
+            parseFloat(income.amount),
+            income.currencyCode,
+            selectedCurrency
+          );
+        })
+        .reduce((total, amount) => total + amount, 0.0);
+      bucketedIncome.push(monthIncome);
+
+      const monthAssets = assets.reduce((total, asset) => {
+        return (
+          total +
+          getAssetPrice(asset, formattedDate, lastRates, selectedCurrency)
+        );
+      }, 0.0);
+      bucketedAssets.push(monthAssets);
+    }
+
+    setCurrentState({
+      rates: lastRates,
+      expenses: bucketedExpenses,
+      income: bucketedIncome,
+      assets: bucketedAssets,
+    });
+
+    // Calculate currency distribution
+    const currencyDistribution = [];
+    const today = new Date();
+    const formattedToday = FormattedDate(
+      new Date(today.getFullYear(), today.getMonth())
+    );
+
+    Object.entries(wallet.keyPoints[formattedToday]).forEach(
+      ([currency, amount]) => {
+        const formattedAmount = parseFloat(amount);
+        if (formattedAmount === 0.0) {
+          return;
+        }
+        const convertedAmount = convertCurrency(
+          lastRates[formattedToday],
+          formattedAmount,
+          currency,
+          selectedCurrency
+        );
+        currencyDistribution.push([currency, convertedAmount]);
+      }
+    );
+
+    setCurrencyDistributionData([
+      ["Currency", "Amount (" + CURRENCIES[selectedCurrency] + ")"],
+      ...currencyDistribution,
+    ]);
+  }, [userData, selectedCurrency]);
 
   const renderTimespanButtons = () => {
     return (
@@ -152,29 +193,18 @@ const Dashboard = () => {
   };
 
   const renderLastMonthCard = () => {
+    if (
+      currentState === {} ||
+      currentState.expenses === undefined ||
+      currentState.income === undefined
+    ) {
+      return <div></div>;
+    }
     // Filter expenses and income for the last month
-    const l1 = globalExpenseData.length;
-    const l2 = globalIncomeData.length;
-    const lastMonthExpenses =
-      l1 > 0
-        ? convertCurrency(
-            globalRates,
-            globalExpenseData[l1 - 1],
-            "EUR",
-            selectedCurrency,
-            true
-          )
-        : .0;
-    const lastMonthIncome =
-      l2 > 0
-        ? convertCurrency(
-            globalRates,
-            globalIncomeData[l2 - 1],
-            "EUR",
-            selectedCurrency,
-            true
-          )
-        : .0;
+    const l1 = currentState.expenses.length;
+    const l2 = currentState.income.length;
+    const lastMonthExpenses = l1 > 0 ? currentState.expenses[l1 - 1] : 0.0;
+    const lastMonthIncome = l2 > 0 ? currentState.income[l2 - 1] : 0.0;
 
     return (
       <Card>
@@ -203,39 +233,29 @@ const Dashboard = () => {
   };
 
   const render1YearCard = () => {
+    if (
+      currentState === {} ||
+      currentState.expenses === undefined ||
+      currentState.income === undefined
+    ) {
+      return <div></div>;
+    }
     // Filter expenses and income for the last year (last 12 months)
-    const maxMonths = Math.min(12, globalDates.length);
-    const periodRates = globalDates
-      .slice(-maxMonths)
-      .map((date) => globalRates[date]);
+    const maxMonthsExp = Math.min(12, currentState.expenses.length);
+    const maxMonthsInc = Math.min(12, currentState.income.length);
+
     const last1YearExpenses =
-      globalExpenseData.length > 0
-        ? globalExpenseData
-            .slice(-maxMonths)
-            .map((value, index) =>
-              convertCurrency(
-                periodRates[index],
-                parseFloat(value),
-                "EUR",
-                selectedCurrency
-              )
-            )
-            .reduce((tot, x) => tot + x, .0)
-        : .0;
+      currentState.expenses.length > 0
+        ? currentState.expenses
+            .slice(-maxMonthsExp)
+            .reduce((tot, x) => tot + x, 0.0)
+        : 0.0;
     const last1YearIncome =
-      globalIncomeData.length > 0
-        ? globalIncomeData
-            .slice(-maxMonths)
-            .map((value, index) =>
-              convertCurrency(
-                periodRates[index],
-                parseFloat(value),
-                "EUR",
-                selectedCurrency
-              )
-            )
-            .reduce((tot, x) => tot + x, .0)
-        : .0;
+      currentState.income.length > 0
+        ? currentState.income
+            .slice(-maxMonthsInc)
+            .reduce((tot, x) => tot + x, 0.0)
+        : 0.0;
 
     return (
       <Card>
@@ -278,6 +298,21 @@ const Dashboard = () => {
     );
   };
 
+  const renderCurrencyDistributionChart = () => {
+    return (
+      <Chart
+        chartType="PieChart"
+        data={currencyDistributionData}
+        options={{
+          title: "Current Currency Distribution",
+          pieHole: 0.4,
+        }}
+        width={"100%"}
+        height={"400px"}
+      />
+    );
+  };
+
   return (
     <Container className="mt-3">
       {message ? (
@@ -295,6 +330,10 @@ const Dashboard = () => {
                 <Row className="mt-4">
                   <Col md={6}>{renderLastMonthCard()}</Col>
                   <Col md={6}>{render1YearCard()}</Col>
+                </Row>
+
+                <Row className="mt-4">
+                  <Col md={12}>{renderCurrencyDistributionChart()}</Col>
                 </Row>
               </Container>
             </>

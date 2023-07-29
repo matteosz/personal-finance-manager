@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface IncomeRepository extends JpaRepository<Income, Long> {
+
+  Income getIncomeById(Long id);
+
   @Modifying
   @Transactional
   void removeIncomeById(Long id);

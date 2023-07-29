@@ -5,13 +5,12 @@ import com.pfm.sbjwt.models.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class AddIncomeRequest {
 
   @NotBlank
-  @Size(max = 10)
+  @Size(min = 10, max = 10)
   private String date;
 
   @NotBlank
@@ -19,7 +18,7 @@ public class AddIncomeRequest {
   private String currencyCode;
 
   @NotBlank
-  @Size(max = 20)
+  @Size(max = 30)
   private String category;
 
   @Size(max = 20)
@@ -35,18 +34,12 @@ public class AddIncomeRequest {
   }
 
   public Income buildIncome(User user) {
-    return new Income(
-        user,
-        LocalDate.parse(date),
-        currencyCode,
-        category,
-        subCategory,
-        description,
-        BigDecimal.valueOf(amount));
+    return new Income(user, date, currencyCode, category, subCategory, description, amount);
   }
 
-  public String getDate() {
-    return date;
+  public LocalDate getDate() {
+    LocalDate localDate = LocalDate.parse(date);
+    return localDate.minusDays(localDate.getDayOfMonth() - 1);
   }
 
   public String getCurrencyCode() {

@@ -6,36 +6,41 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "initial_state")
-public class InitialState {
+@Table(name = "wallet_origin")
+public class WalletOrigin {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
 
   @Column(nullable = false)
-  private BigDecimal value;
+  private LocalDate date;
 
   @Column(nullable = false)
-  private LocalDate startDate;
+  private String currencyCode;
 
-  public InitialState() {
-    // Public empty constructor
+  @Column(nullable = false)
+  private BigDecimal amount;
+
+  public WalletOrigin() {
+    // Default constructor
   }
 
-  public InitialState(User user, BigDecimal value, LocalDate startDate) {
-    this.user = user;
-    this.value = value;
-    this.startDate = startDate;
+  public WalletOrigin(WalletEntry entry) {
+    user = entry.getUser();
+    date = entry.getDate();
+    currencyCode = entry.getCurrencyCode();
+    amount = entry.getAmount();
   }
 
   public Long getId() {
@@ -46,16 +51,15 @@ public class InitialState {
     return user;
   }
 
-  public BigDecimal getValue() {
-    return value;
+  public LocalDate getDate() {
+    return date;
   }
 
-  public LocalDate getStartDate() {
-    return startDate;
+  public String getCurrencyCode() {
+    return currencyCode;
   }
 
-  public void setValues(LocalDate startDate, BigDecimal value) {
-    this.startDate = startDate;
-    this.value = value;
+  public BigDecimal getAmount() {
+    return amount;
   }
 }

@@ -142,11 +142,7 @@ export const INCOME_CATEGORIES = {
   ],
   Gifts: ["Birthday", "Random", "Special Occasions", "Other"],
   Investment: ["Coupon", "Dividends", "Stock Options", "Other"],
-  Rental: [
-    "Airbnb",
-    "Real Estate",
-    "Other",
-  ],
+  Rental: ["Airbnb", "Real Estate", "Other"],
   Salary: ["Base Pay", "Bonus", "Relocation", "Other"],
   Savings: ["Savings Interest", "Other"],
   "Unemployment Benefits": ["State Benefits", "Federal Benefits", "Other"],

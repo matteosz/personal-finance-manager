@@ -43,13 +43,10 @@ const isTracked = (category) => {
   return ["Stocks", "Bonds", "Cryptos"].includes(category);
 };
 
-export const getAssetPrice = (asset, date, rates, currencyTo) => {
+export const getAssetPrice = (asset, date, rates, currencyTo = "EUR") => {
   let price;
-  if (isTracked(asset.category)) {
+  if (isTracked(asset.category) && asset.pricesByDate[date] !== undefined) {
     price = asset.pricesByDate[date];
-    if (price === undefined) {
-      price = asset.amount;
-    }
   } else {
     price = asset.amount;
   }
@@ -71,6 +68,7 @@ const Asset = () => {
     identifierCode: "",
     description: "",
     amount: "",
+    toBePurchased: false,
   });
   const [filters, setFilters] = useState({
     month: MONTHS[today.getMonth()],
@@ -113,11 +111,18 @@ const Asset = () => {
   };
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setAssetForm((prevAssetForm) => ({
-      ...prevAssetForm,
-      [name]: value,
-    }));
+    const { name, value, type, checked } = event.target;
+    if (type !== "checkbox") {
+      setAssetForm((prevAssetForm) => ({
+        ...prevAssetForm,
+        [name]: value,
+      }));
+    } else {
+      setAssetForm((prevAssetForm) => ({
+        ...prevAssetForm,
+        [name]: checked,
+      }));
+    }
   };
 
   const handleCategoryChange = (event) => {
@@ -140,6 +145,7 @@ const Asset = () => {
           identifierCode: "",
           description: "",
           amount: "",
+          toBePurchased: false,
         });
         toggleForm(false);
       })
@@ -166,6 +172,7 @@ const Asset = () => {
       identifierCode: "",
       description: "",
       amount: "",
+      toBePurchased: false,
     });
   };
 
@@ -228,75 +235,73 @@ const Asset = () => {
   }, [errorMessage]);
 
   useEffect(() => {
-    if (userData) {
-      const filteredAssets = userData.assets.filter((asset) => {
-        const { date, currencyCode, category, amount } = asset;
-        const {
-          month,
-          year,
-          category: filterCategory,
-          currency,
-          minAmount,
-        } = filters;
+    const filteredAssets = userData.assets.filter((asset) => {
+      const { date, currencyCode, category, amount } = asset;
+      const {
+        month,
+        year,
+        category: filterCategory,
+        currency,
+        minAmount,
+      } = filters;
 
-        const objDate = new Date(date);
+      const objDate = new Date(date);
 
-        if (
-          month &&
-          month !== "" &&
-          objDate.getMonth() !== MONTHS_CARDINALITY[month]
-        ) {
-          return false;
-        }
+      if (
+        month &&
+        month !== "" &&
+        objDate.getMonth() !== MONTHS_CARDINALITY[month]
+      ) {
+        return false;
+      }
 
-        if (year && objDate.getFullYear() !== parseInt(year)) {
-          return false;
-        }
+      if (year && objDate.getFullYear() !== parseInt(year)) {
+        return false;
+      }
 
-        if (currency && currencyCode !== currency) {
-          return false;
-        }
+      if (currency && currencyCode !== currency) {
+        return false;
+      }
 
-        if (filterCategory && category !== filterCategory) {
-          return false;
-        }
+      if (filterCategory && category !== filterCategory) {
+        return false;
+      }
 
-        if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
-          return false;
-        }
+      if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
+        return false;
+      }
 
-        return true;
-      });
+      return true;
+    });
 
-      const sortedAssets = [...filteredAssets].sort((a, b) => {
-        const fieldA = a[sortBy];
-        const fieldB = b[sortBy];
+    const sortedAssets = [...filteredAssets].sort((a, b) => {
+      const fieldA = a[sortBy];
+      const fieldB = b[sortBy];
 
-        // Custom sort for date as string sorting doesn't work
-        if (sortBy === "date") {
-          const dateA = new Date(fieldA);
-          const dateB = new Date(fieldB);
-          if (dateA < dateB) {
-            return sortOrder === "asc" ? -1 : 1;
-          }
-          if (dateA > dateB) {
-            return sortOrder === "asc" ? 1 : -1;
-          }
-          return 0;
-        }
-
-        if (fieldA < fieldB) {
+      // Custom sort for date as string sorting doesn't work
+      if (sortBy === "date") {
+        const dateA = new Date(fieldA);
+        const dateB = new Date(fieldB);
+        if (dateA < dateB) {
           return sortOrder === "asc" ? -1 : 1;
         }
-        if (fieldA > fieldB) {
+        if (dateA > dateB) {
           return sortOrder === "asc" ? 1 : -1;
         }
         return 0;
-      });
+      }
 
-      setAssetList(sortedAssets);
-    }
-  }, [userData, filters, sortBy, sortOrder]);
+      if (fieldA < fieldB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+      if (fieldA > fieldB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setAssetList(sortedAssets);
+  }, [userData.assets, filters, sortBy, sortOrder]);
 
   return (
     <Container className="mt-3">
@@ -347,7 +352,7 @@ const Asset = () => {
                   type="date"
                   name="date"
                   value={assetForm.date}
-                  min={userData.initialState.startDate}
+                  min={userData.wallet.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -430,6 +435,16 @@ const Asset = () => {
                   value={assetForm.purchasedAmount}
                   onChange={handleInputChange}
                   required
+                />
+              </Form.Group>
+
+              <Form.Group controlId="formToBePurchased">
+                <Form.Check
+                  type="checkbox"
+                  name="toBePurchased"
+                  label="To be purchased"
+                  checked={assetForm.toBePurchased}
+                  onChange={handleInputChange}
                 />
               </Form.Group>
 
@@ -516,8 +531,8 @@ const Asset = () => {
                       <Form.Label>Year</Form.Label>
                       <Form.Control
                         type="number"
-                        min="1900"
-                        max="2200"
+                        min="2000"
+                        max="2100"
                         name="year"
                         value={filters.year}
                         onChange={handleFilterChange}
@@ -642,7 +657,7 @@ const Asset = () => {
                             type="date"
                             name="date"
                             value={modifiedAsset.date}
-                            min={userData.initialState.startDate}
+                            min={userData.wallet.startDate}
                             onChange={(e) =>
                               setModifiedAsset((prevAsset) => ({
                                 ...prevAsset,

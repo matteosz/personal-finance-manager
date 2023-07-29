@@ -5,6 +5,7 @@ import com.pfm.sbjwt.models.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 public class AddAssetRequest {
   @NotBlank
@@ -16,7 +17,7 @@ public class AddAssetRequest {
   private String currencyCode;
 
   @NotBlank
-  @Size(max = 20)
+  @Size(max = 30)
   private String category;
 
   @Size(max = 100)
@@ -27,6 +28,8 @@ public class AddAssetRequest {
 
   @NotNull private Float amount;
 
+  @NotNull private Boolean toBePurchased;
+
   public AddAssetRequest() {
     // Public empty constructor
   }
@@ -35,8 +38,9 @@ public class AddAssetRequest {
     return new Asset(user, date, currencyCode, category, description, identifierCode, amount);
   }
 
-  public String getDate() {
-    return date;
+  public LocalDate getDate() {
+    LocalDate localDate = LocalDate.parse(date);
+    return localDate.minusDays(localDate.getDayOfMonth() - 1);
   }
 
   public String getCurrencyCode() {
@@ -57,5 +61,9 @@ public class AddAssetRequest {
 
   public Float getAmount() {
     return amount;
+  }
+
+  public Boolean getToBePurchased() {
+    return toBePurchased;
   }
 }

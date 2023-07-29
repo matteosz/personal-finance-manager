@@ -11,18 +11,14 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import Expense from "./components/Expenses";
 import Income from "./components/Income";
-import Assets, { getAssetPrice } from "./components/Assets";
 import Setup from "./components/Setup";
+import Assets from "./components/Assets";
 
 import EventBus from "./common/EventBus";
 
 import { logout } from "./actions/auth";
 import { clearMessage } from "./actions/message";
 import { getUsercontent } from "./actions/user";
-import { FormattedDate } from "./objects/FormattedDate";
-import { setGlobalFinancialState } from "./actions/global";
-import { convertCurrency } from "./objects/Currency";
-import { MONTHS_FROM_MS } from "./common/constants";
 
 const App = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
@@ -64,104 +60,8 @@ const App = () => {
     };
   }, [logOut]);
 
-  // Compute the global data for the user for each month (global history) every time the data changes
-  useEffect(() => {
-    if (!userData || !userData.initialState) {
-      return;
-    }
-    const { lastRates, expenses, income, assets, initialState } = userData;
-
-    const startDate = new Date(initialState.startDate);
-    const currentDate = new Date();
-    const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
-
-    const bucketDates = [];
-    const bucketedNetWorth = [];
-    const bucketedExpenses = [];
-    const bucketedIncome = [];
-    const bucketedAssets = [];
-
-    const initialYear = startDate.getFullYear();
-    const initialMonth = startDate.getMonth();
-    let netSum = initialState.value;
-    for (let i = 0; i <= maxMonths; ++i) {
-      const year = initialYear + Math.floor(i / 12);
-      const month = (initialMonth + i) % 12;
-
-      const currentMonth = new Date(year, month);
-      const formattedDate = FormattedDate(currentMonth);
-      bucketDates.push(formattedDate);
-
-      const monthExpenses = expenses
-        .filter((expense) => {
-          const expenseDate = new Date(expense.date);
-          return (
-            expenseDate.getFullYear() === year &&
-            expenseDate.getMonth() === month
-          );
-        })
-        .map((expense) => {
-          const currency = expense.currencyCode;
-          const amount = parseFloat(expense.amount);
-          if (currency !== "EUR") {
-            return convertCurrency(
-              lastRates[formattedDate],
-              amount,
-              currency,
-              "EUR"
-            );
-          }
-          return amount;
-        })
-        .reduce((total, amount) => total + amount, 0.0);
-      bucketedExpenses.push(monthExpenses);
-
-      const monthIncome = income
-        .filter((income) => {
-          const incomeDate = new Date(income.date);
-          return (
-            incomeDate.getFullYear() === year && incomeDate.getMonth() === month
-          );
-        })
-        .map((income) => {
-          const currency = income.currencyCode;
-          const amount = parseFloat(income.amount);
-          if (currency !== "EUR") {
-            return convertCurrency(
-              lastRates[formattedDate],
-              amount,
-              currency,
-              "EUR"
-            );
-          }
-          return amount;
-        })
-        .reduce((total, amount) => total + amount, 0.0);
-      bucketedIncome.push(monthIncome);
-
-      const monthAssets = assets.reduce((total, asset) => {
-        return total + getAssetPrice(asset, formattedDate, lastRates, "EUR");
-      }, 0.0);
-      bucketedAssets.push(monthAssets);
-
-      netSum += monthIncome - monthExpenses;
-      bucketedNetWorth.push(netSum + monthAssets);
-    }
-
-    dispatch(
-      setGlobalFinancialState({
-        rates: lastRates,
-        dates: bucketDates,
-        netWorth: bucketedNetWorth,
-        expenses: bucketedExpenses,
-        income: bucketedIncome,
-        assets: bucketedAssets,
-      })
-    );
-  }, [userData, dispatch]);
-
   const setupOrElement = (element) => {
-    if (currentUser && (setup || (userData && !userData.initialState))) {
+    if (currentUser && (setup || (userData && !userData.wallet))) {
       return <Setup />;
     } else {
       return element;
@@ -170,9 +70,7 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && !setup && userData && userData.initialState && (
-        <Sidebar />
-      )}
+      {currentUser && !setup && userData && userData.wallet && <Sidebar />}
 
       <div className="container mt-3">
         <Routes>

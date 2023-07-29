@@ -7,7 +7,7 @@ import {
   MODIFY_USER_EXPENSE,
   MODIFY_USER_INCOME,
   MODIFY_USER_ASSET,
-  SET_USER_INITIAL_STATE,
+  SET_USER_WALLET,
 } from "../actions/types";
 
 const initialState = {};
@@ -19,12 +19,21 @@ const userReducer = (state = initialState, action) => {
         ...state,
         user: action.payload,
       };
-      case SET_USER_INITIAL_STATE:
+    case SET_USER_WALLET:
       return {
         ...state,
         user: {
           ...state.user,
-          initialState: action.payload,
+          wallet: action.payload,
+        },
+      };
+    case ADD_USER_EXPENSE:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          expenses: [...state.user.expenses, action.payload.expense],
+          wallet: action.payload.wallet,
         },
       };
     case MODIFY_USER_EXPENSE:
@@ -34,26 +43,21 @@ const userReducer = (state = initialState, action) => {
           ...state.user,
           expenses: state.user.expenses
             .map((expense) => {
-              if (expense.id === action.payload.id) {
-                if (action.payload.toBeDeleted) {
+              const expenseData = action.payload.expense;
+              if (expense.id === expenseData.id) {
+                if (expenseData.toBeDeleted) {
                   return null;
                 } else {
-                  return action.payload; // Replace the item with the new expense
+                  return expenseData; // Replace the item with the new expense
                 }
               }
               return expense; // Keep the original expense item
             })
             .filter(Boolean), // Remove any null values from the expenses list
+          wallet: action.payload.wallet,
         },
       };
-    case ADD_USER_EXPENSE:
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          expenses: [...state.user.expenses, ...action.payload],
-        },
-      };
+
     case MODIFY_USER_INCOME:
       return {
         ...state,
@@ -61,24 +65,27 @@ const userReducer = (state = initialState, action) => {
           ...state.user,
           income: state.user.income
             .map((income) => {
-              if (income.id === action.payload.id) {
-                if (action.payload.toBeDeleted) {
+              const incomeData = action.payload.income;
+              if (income.id === incomeData.id) {
+                if (incomeData.toBeDeleted) {
                   return null;
                 } else {
-                  return action.payload;
+                  return incomeData;
                 }
               }
               return income;
             })
             .filter(Boolean),
         },
+        wallet: action.payload.wallet,
       };
     case ADD_USER_INCOME:
       return {
         ...state,
         user: {
           ...state.user,
-          income: [...state.user.income, ...action.payload],
+          income: [...state.user.income, action.payload.income],
+          wallet: action.payload.wallet,
         },
       };
     case ADD_USER_ASSET:
@@ -86,7 +93,8 @@ const userReducer = (state = initialState, action) => {
         ...state,
         user: {
           ...state.user,
-          assets: [...state.user.assets, action.payload],
+          assets: [...state.user.assets, action.payload.asset],
+          wallet: action.payload.wallet,
         },
       };
     case MODIFY_USER_ASSET:
@@ -96,16 +104,18 @@ const userReducer = (state = initialState, action) => {
           ...state.user,
           assets: state.user.assets
             .map((asset) => {
-              if (asset.id === action.payload.id) {
-                if (action.payload.toBeDeleted) {
+              const assetData = action.payload.asset;
+              if (asset.id === assetData.id) {
+                if (assetData.toBeDeleted) {
                   return null;
                 } else {
-                  return action.payload;
+                  return assetData;
                 }
               }
               return asset;
             })
             .filter(Boolean),
+          wallet: action.payload.wallet,
         },
       };
     case CLEAR_USER:

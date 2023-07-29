@@ -9,7 +9,7 @@ import {
   MODIFY_USER_INCOME,
   MODIFY_USER_ASSET,
   ADD_USER_ASSET,
-  SET_USER_INITIAL_STATE,
+  SET_USER_WALLET,
 } from "./types";
 import UserService from "../services/user.service";
 
@@ -44,12 +44,21 @@ export const getUsercontent = () => (dispatch) => {
   );
 };
 
-export const setupUser = (amount, date) => (dispatch) => {
-  return UserService.postUserSetup(amount, date).then(
+export const setupUser = (entries, date) => (dispatch) => {
+  const aggregatedEntries = entries.reduce((result, entry) => {
+    const { amount, currency } = entry;
+    if (result.hasOwnProperty(currency)) {
+      result[currency] += parseFloat(amount);
+    } else {
+      result[currency] = parseFloat(amount);
+    }
+    return result;
+  }, {});
+  return UserService.postUserSetup(aggregatedEntries, date).then(
     (response) => {
       dispatch({
-        type: SET_USER_INITIAL_STATE,
-        payload: response.data.initialState,
+        type: SET_USER_WALLET,
+        payload: response.data.wallet,
       });
       return Promise.resolve();
     },
@@ -71,12 +80,12 @@ export const setupUser = (amount, date) => (dispatch) => {
   );
 };
 
-export const addExpense = (expenses) => (dispatch) => {
-  return UserService.postUserAddExpense(expenses).then(
+export const addExpense = (expense) => (dispatch) => {
+  return UserService.postUserAddExpense(expense).then(
     (response) => {
       dispatch({
         type: ADD_USER_EXPENSE,
-        payload: response.data.expenses,
+        payload: response.data,
       });
       return Promise.resolve();
     },
@@ -103,7 +112,7 @@ export const addIncome = (income) => (dispatch) => {
     (response) => {
       dispatch({
         type: ADD_USER_INCOME,
-        payload: response.data.incomes,
+        payload: response.data,
       });
       return Promise.resolve();
     },
@@ -130,7 +139,7 @@ export const addAsset = (asset) => (dispatch) => {
     (response) => {
       dispatch({
         type: ADD_USER_ASSET,
-        payload: response.data.asset,
+        payload: response.data,
       });
       return Promise.resolve();
     },
@@ -163,7 +172,7 @@ export const modifyExpense =
       (response) => {
         dispatch({
           type: MODIFY_USER_EXPENSE,
-          payload: response.data.expenses[0],
+          payload: response.data,
         });
         return Promise.resolve();
       },
@@ -196,7 +205,7 @@ export const modifyIncome =
       (response) => {
         dispatch({
           type: MODIFY_USER_INCOME,
-          payload: response.data.incomes[0],
+          payload: response.data,
         });
         return Promise.resolve();
       },
@@ -229,7 +238,7 @@ export const modifyAsset =
       (response) => {
         dispatch({
           type: MODIFY_USER_ASSET,
-          payload: response.data.asset,
+          payload: response.data,
         });
         return Promise.resolve();
       },

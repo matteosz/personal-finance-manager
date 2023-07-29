@@ -59,8 +59,6 @@ const Income = () => {
     subCategory: "",
     description: "",
     amount: "",
-    isRecurring: false,
-    recurringMonths: 1,
   });
   const [filters, setFilters] = useState({
     month: MONTHS[today.getMonth()],
@@ -91,7 +89,7 @@ const Income = () => {
   const [chartData, setChartData] = useState([]);
   const [pieData, setPieData] = useState({
     chart: [],
-    tot: 0,
+    tot: 0.0,
   });
 
   const [subCategories, setSubCategories] = useState([]);
@@ -150,23 +148,7 @@ const Income = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Process the recurring income data if it is set
-    let incomesToAdd = [];
-    if (incomeForm.isRecurring) {
-      const startDate = new Date(incomeForm.date);
-      for (let i = 0; i < incomeForm.recurringMonths; i++) {
-        const currentMonth = new Date(startDate);
-        currentMonth.setMonth(startDate.getMonth() + i);
-        incomesToAdd.push({
-          ...incomeForm,
-          date: FormattedDate(currentMonth),
-        });
-      }
-    } else {
-      incomesToAdd.push(incomeForm);
-    }
-
-    dispatch(addIncome(incomesToAdd))
+    dispatch(addIncome(incomeForm))
       .then(() => {
         setSuccessMessage("Income added");
         setIncomeForm({
@@ -176,8 +158,6 @@ const Income = () => {
           subCategory: "",
           description: "",
           amount: "",
-          isRecurring: false,
-          recurringMonths: 1,
         });
         toggleForm(false);
       })
@@ -204,8 +184,6 @@ const Income = () => {
       subCategory: "",
       description: "",
       amount: "",
-      isRecurring: false,
-      recurringMonths: 1,
     });
   };
 
@@ -275,7 +253,7 @@ const Income = () => {
 
   const preCalculateChartData = (incomes, lastRates) => {
     const minimumDate = findMinimumDate(incomes);
-    const startDate = minimumDate? new Date(minimumDate) : new Date();
+    const startDate = minimumDate ? new Date(minimumDate) : new Date();
     const currentDate = new Date();
     const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
 
@@ -359,78 +337,76 @@ const Income = () => {
   }, [errorMessage]);
 
   useEffect(() => {
-    if (userData) {
-      setRates(userData.lastRates);
-      preCalculateChartData(userData.income, userData.lastRates);
-      // Filter incomes for the table
-      const filteredincomes = userData.income.filter((income) => {
-        const { date, currencyCode, category, amount } = income;
-        const {
-          month,
-          year,
-          category: filterCategory,
-          currency,
-          minAmount,
-        } = filters;
+    setRates(userData.lastRates);
+    preCalculateChartData(userData.income, userData.lastRates);
+    // Filter incomes for the table
+    const filteredincomes = userData.income.filter((income) => {
+      const { date, currencyCode, category, amount } = income;
+      const {
+        month,
+        year,
+        category: filterCategory,
+        currency,
+        minAmount,
+      } = filters;
 
-        const objDate = new Date(date);
+      const objDate = new Date(date);
 
-        if (
-          month &&
-          month !== "" &&
-          objDate.getMonth() !== MONTHS_CARDINALITY[month]
-        ) {
-          return false;
-        }
+      if (
+        month &&
+        month !== "" &&
+        objDate.getMonth() !== MONTHS_CARDINALITY[month]
+      ) {
+        return false;
+      }
 
-        if (year && objDate.getFullYear() !== parseInt(year)) {
-          return false;
-        }
+      if (year && objDate.getFullYear() !== parseInt(year)) {
+        return false;
+      }
 
-        if (currency && currencyCode !== currency) {
-          return false;
-        }
+      if (currency && currencyCode !== currency) {
+        return false;
+      }
 
-        if (filterCategory && category !== filterCategory) {
-          return false;
-        }
+      if (filterCategory && category !== filterCategory) {
+        return false;
+      }
 
-        if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
-          return false;
-        }
+      if (minAmount && parseFloat(amount) < parseFloat(minAmount)) {
+        return false;
+      }
 
-        return true;
-      });
+      return true;
+    });
 
-      const sortedincomes = [...filteredincomes].sort((a, b) => {
-        const fieldA = a[sortBy];
-        const fieldB = b[sortBy];
+    const sortedincomes = [...filteredincomes].sort((a, b) => {
+      const fieldA = a[sortBy];
+      const fieldB = b[sortBy];
 
-        // Custom sort for date as string sorting doesn't work
-        if (sortBy === "date") {
-          const dateA = new Date(fieldA);
-          const dateB = new Date(fieldB);
-          if (dateA < dateB) {
-            return sortOrder === "asc" ? -1 : 1;
-          }
-          if (dateA > dateB) {
-            return sortOrder === "asc" ? 1 : -1;
-          }
-          return 0;
-        }
-
-        if (fieldA < fieldB) {
+      // Custom sort for date as string sorting doesn't work
+      if (sortBy === "date") {
+        const dateA = new Date(fieldA);
+        const dateB = new Date(fieldB);
+        if (dateA < dateB) {
           return sortOrder === "asc" ? -1 : 1;
         }
-        if (fieldA > fieldB) {
+        if (dateA > dateB) {
           return sortOrder === "asc" ? 1 : -1;
         }
         return 0;
-      });
+      }
 
-      setIncomeList(sortedincomes);
-    }
-  }, [userData, filters, sortBy, sortOrder]);
+      if (fieldA < fieldB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+      if (fieldA > fieldB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setIncomeList(sortedincomes);
+  }, [userData.income, userData.lastRates, filters, sortBy, sortOrder]);
 
   // Pie chart update
   useEffect(() => {
@@ -439,7 +415,7 @@ const Income = () => {
       const timespan = MONTHS_TIMESPAN[pieFilter.timespan];
       const maxLength = Math.min(timespan, globalIncomeData.length);
       const timespanData = globalIncomeData.slice(-maxLength);
-      
+
       const generalTotal = timespanData.reduce(
         (total, monthData) =>
           total +
@@ -449,7 +425,7 @@ const Income = () => {
             "EUR",
             selectedCurrency
           ),
-        .0
+        0.0
       );
 
       const selectedCategory = pieFilter.category;
@@ -495,7 +471,7 @@ const Income = () => {
           "Category",
           "Amount (" + CURRENCIES[selectedCurrency] + ")",
         ]);
-        if (generalTotal !== 0) {
+        if (generalTotal !== 0.0) {
           // See pie chart by category
           Object.entries(categories).forEach(([key, value]) => {
             chart.push([value.name, value.total]);
@@ -510,7 +486,7 @@ const Income = () => {
           "Amount (" + CURRENCIES[selectedCurrency] + ")",
         ]);
         const categorySum = categories[selectedCategory].total;
-        if (categorySum !== 0) {
+        if (categorySum !== 0.0) {
           Object.entries(subCategories).forEach(([key, value]) => {
             chart.push([value.name, value.total]);
           });
@@ -606,7 +582,7 @@ const Income = () => {
                   type="date"
                   name="date"
                   value={incomeForm.date}
-                  min={userData.initialState.startDate}
+                  min={userData.wallet.startDate}
                   onChange={handleInputChange}
                   required
                 />
@@ -695,31 +671,6 @@ const Income = () => {
                 />
               </Form.Group>
 
-              <Form.Group controlId="formRecurring">
-                <Form.Check
-                  type="checkbox"
-                  label="Recurring income"
-                  name="isRecurring"
-                  checked={incomeForm.isRecurring}
-                  onChange={handleInputChange}
-                />
-              </Form.Group>
-
-              {incomeForm.isRecurring && (
-                <Form.Group controlId="formRecurringMonths">
-                  <Form.Label>Recurring for how many months</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="recurringMonths"
-                    min="1"
-                    max="12"
-                    value={incomeForm.recurringMonths}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </Form.Group>
-              )}
-
               <br></br>
               <div style={{ position: "relative" }}>
                 <Button
@@ -803,8 +754,8 @@ const Income = () => {
                       <Form.Label>Year</Form.Label>
                       <Form.Control
                         type="number"
-                        min="1900"
-                        max="2200"
+                        min="2000"
+                        max="2100"
                         name="year"
                         value={filters.year}
                         onChange={handleFilterChange}
@@ -929,7 +880,7 @@ const Income = () => {
                             type="date"
                             name="date"
                             value={modifiedIncome.date}
-                            min={userData.initialState.startDate}
+                            min={userData.wallet.startDate}
                             onChange={(e) =>
                               setModifiedIncome((previncome) => ({
                                 ...previncome,
@@ -1231,7 +1182,7 @@ const Income = () => {
 
       <Card className="mt-3">
         <Card.Header>
-          <h5 style={{ textAlign: "center" }}>income Trend</h5>
+          <h5 style={{ textAlign: "center" }}>Income Trend</h5>
         </Card.Header>
         <Card.Body>
           <Row>

@@ -7,21 +7,22 @@ const getUserBoard = () => {
   return axios.get(API_URL + "user", { headers: authHeader() });
 };
 
-const postUserSetup = (amount, date) => {
+const postUserSetup = (entries, startDate) => {
   return axios.post(
     API_URL + "user/setup",
-    { value: amount, startDate: date },
+    { entries, startDate },
     { headers: authHeader() }
   );
 };
 
-const postUserAddExpense = (expenses) => {
-  return axios.post(API_URL + "user/expense/add", expenses, {
+const postUserAddExpense = (expense) => {
+  return axios.post(API_URL + "user/expense/add", expense, {
     headers: authHeader(),
   });
 };
 
 const postUserAddIncome = (income) => {
+  delete income.date;
   return axios.post(API_URL + "user/income/add", income, {
     headers: authHeader(),
   });

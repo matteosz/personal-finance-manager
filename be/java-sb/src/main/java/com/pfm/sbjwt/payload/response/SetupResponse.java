@@ -1,15 +1,15 @@
 package com.pfm.sbjwt.payload.response;
 
-import com.pfm.sbjwt.payload.response.models.InitialStateNetwork;
+import com.pfm.sbjwt.payload.response.models.WalletNetwork;
 
 public class SetupResponse {
-  private final InitialStateNetwork initialState;
+  private final WalletNetwork wallet;
 
-  public SetupResponse(InitialStateNetwork initialState) {
-    this.initialState = initialState;
+  public SetupResponse(WalletNetwork wallet) {
+    this.wallet = wallet;
   }
 
-  public InitialStateNetwork getInitialState() {
-    return initialState;
+  public WalletNetwork getWallet() {
+    return wallet;
   }
 }

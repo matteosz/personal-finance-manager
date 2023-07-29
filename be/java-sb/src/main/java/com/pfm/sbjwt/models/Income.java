@@ -36,7 +36,7 @@ public class Income {
   private String category;
 
   @NotBlank
-  @Size(max = 20)
+  @Size(max = 30)
   private String subCategory;
 
   @Size(max = 100)
@@ -51,19 +51,19 @@ public class Income {
 
   public Income(
       User user,
-      LocalDate date,
+      String date,
       String currencyCode,
       String category,
       String subCategory,
       String description,
-      BigDecimal amount) {
+      Float amount) {
     this.user = user;
-    this.date = date;
+    this.date = LocalDate.parse(date);
     this.currencyCode = currencyCode;
     this.category = category;
     this.subCategory = subCategory;
     this.description = description;
-    this.amount = amount;
+    this.amount = BigDecimal.valueOf(amount);
   }
 
   public Long getId() {

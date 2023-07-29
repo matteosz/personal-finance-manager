@@ -2,21 +2,28 @@ package com.pfm.sbjwt.payload.response;
 
 import com.pfm.sbjwt.models.Expense;
 import com.pfm.sbjwt.payload.response.models.ExpenseNetwork;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.pfm.sbjwt.payload.response.models.WalletNetwork;
 
 public class ExpenseResponse {
-  private final List<ExpenseNetwork> expenses;
+  private final ExpenseNetwork expense;
 
-  public ExpenseResponse(List<Expense> expenses) {
-    this.expenses = expenses.stream().map(ExpenseNetwork::new).collect(Collectors.toList());
+  private final WalletNetwork wallet;
+
+  public ExpenseResponse(Expense expense, WalletNetwork wallet) {
+    this.expense = new ExpenseNetwork(expense);
+    this.wallet = wallet;
   }
 
-  public ExpenseResponse(ExpenseNetwork expense) {
-    expenses = List.of(expense);
+  public ExpenseResponse(ExpenseNetwork expense, WalletNetwork wallet) {
+    this.expense = expense;
+    this.wallet = wallet;
   }
 
-  public List<ExpenseNetwork> getExpenses() {
-    return expenses;
+  public ExpenseNetwork getExpense() {
+    return expense;
+  }
+
+  public WalletNetwork getWallet() {
+    return wallet;
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { convertCurrency, getFirstDate } from "../objects/Currency";
+import { getFirstDate } from "../objects/Currency";
 import { CURRENCIES } from "../common/constants";
 import { setupUser } from "../actions/user";
 
@@ -16,10 +16,18 @@ const Setup = () => {
   const { user: userData } = useSelector((state) => state.user);
   const { setup } = useSelector((state) => state.global);
 
-  const defEntry = userData.initialState
-    ? [{ amount: userData.initialState.value, currency: "EUR", }, userData.initialState.startDate]
-    : [{ amount: "", currency: "", }, ""];
-  const [entries, setEntries] = useState([defEntry[0]]);
+  const defEntry =
+    userData && userData.wallet
+      ? [
+          Object.entries(userData.wallet.keyPoints[userData.wallet.startDate])
+            .filter((entry) => entry[1] !== 0)
+            .map((entry) => {
+              return { amount: entry[1], currency: entry[0] };
+            }),
+          userData.wallet.startDate,
+        ]
+      : [[{ amount: "", currency: "" }], ""];
+  const [entries, setEntries] = useState(defEntry[0]);
   const [startDate, setStartDate] = useState(defEntry[1]);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +61,7 @@ const Setup = () => {
   };
 
   const handleAddEntry = () => {
-    setEntries((prevEntries) => [...prevEntries, { amount: "", currency: "", date: "", }]);
+    setEntries((prevEntries) => [...prevEntries, { amount: "", currency: "" }]);
   };
 
   const handleRemoveEntry = (index) => {
@@ -68,17 +76,7 @@ const Setup = () => {
     e.preventDefault();
     setLoading(true);
 
-    const entriesEUR = entries.map((entry) => {
-      debugger;
-      return convertCurrency(
-        userData.lastRates[startDate],
-        parseFloat(entry.amount),
-        entry.currency,
-        "EUR"
-      );
-    });
-
-    dispatch(setupUser(entriesEUR.reduce((tot, x) => tot + x, .0), startDate))
+    dispatch(setupUser(entries, startDate))
       .then(() => {
         setLoading(false);
         dispatch(clearMessage());
@@ -95,14 +93,14 @@ const Setup = () => {
         <div className="card-body">
           {!setup ? (
             <div>
-            <h2 className="card-title">Account Setup</h2>
-            <h4>Set your initial cash availability</h4>
+              <h2 className="card-title">Account Setup</h2>
+              <h4>Set your initial cash availability</h4>
             </div>
           ) : (
             <div>
               <div>
-              <h2 className="card-title">Modify account setup</h2>
-              <h4>Modify your initial cash availability</h4>
+                <h2 className="card-title">Modify account setup</h2>
+                <h4>Modify your initial cash availability</h4>
               </div>
               <p
                 style={{
@@ -122,8 +120,14 @@ const Setup = () => {
               <label htmlFor={`date`}>Start date of tracking</label>
               <input
                 type="date"
-                min={userData ? getFirstDate(userData.lastRates) : FormattedDate(new Date())}
-                max={defEntry[1] === "" ? "" : defEntry[1]}
+                min={
+                  userData
+                    ? getFirstDate(userData.lastRates)
+                    : FormattedDate(new Date())
+                }
+                max={
+                  defEntry[1] === "" ? FormattedDate(new Date()) : defEntry[1]
+                }
                 className="form-control"
                 id="start-date"
                 value={startDate}
