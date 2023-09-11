@@ -7,11 +7,7 @@ import { Chart } from "react-google-charts";
 import { getAssetPrice } from "./Assets";
 import { FormattedDate } from "../objects/FormattedDate";
 import { convertCurrency } from "../objects/Currency";
-import {
-  CURRENCIES,
-  MONTHS_TIMESPAN_NW as MONTHS,
-  MONTHS_FROM_MS,
-} from "../common/constants";
+import { CURRENCIES, MONTHS_TIMESPAN_NW as MONTHS } from "../common/constants";
 
 import "./ComponentsStyles.css";
 
@@ -60,14 +56,17 @@ const Dashboard = () => {
     const { lastRates, expenses, income, assets, wallet } = userData;
 
     const startDate = new Date(wallet.startDate);
-    const maxMonths = Math.floor((new Date() - startDate) / MONTHS_FROM_MS);
+    const today = new Date();
+    const months =
+      (today.getFullYear() - startDate.getFullYear()) * 12 +
+      (today.getMonth() - startDate.getMonth());
 
     const bucketedExpenses = [];
     const bucketedIncome = [];
     const bucketedAssets = [];
     const initialYear = startDate.getFullYear();
     const initialMonth = startDate.getMonth();
-    for (let i = 0; i <= maxMonths; ++i) {
+    for (let i = 0; i <= months; ++i) {
       const year = initialYear + Math.floor(i / 12);
       const month = (initialMonth + i) % 12;
 
@@ -129,7 +128,6 @@ const Dashboard = () => {
 
     // Calculate currency distribution
     const currencyDistribution = [];
-    const today = new Date();
     const formattedToday = FormattedDate(
       new Date(today.getFullYear(), today.getMonth())
     );
@@ -194,7 +192,7 @@ const Dashboard = () => {
 
   const renderLastMonthCard = () => {
     if (
-      currentState === {} ||
+      Object.keys(currentState).length === 0 ||
       currentState.expenses === undefined ||
       currentState.income === undefined
     ) {
@@ -234,7 +232,7 @@ const Dashboard = () => {
 
   const render1YearCard = () => {
     if (
-      currentState === {} ||
+      Object.keys(currentState).length === 0 ||
       currentState.expenses === undefined ||
       currentState.income === undefined
     ) {
@@ -333,7 +331,9 @@ const Dashboard = () => {
                 </Row>
 
                 <Row className="mt-4">
-                  <Col md={12}>{renderCurrencyDistributionChart()}</Col>
+                  <Col md={2} /> 
+                  <Col md={8}>{renderCurrencyDistributionChart()}</Col>
+                  <Col md={2} /> 
                 </Row>
               </Container>
             </>

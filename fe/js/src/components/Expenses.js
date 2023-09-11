@@ -32,7 +32,6 @@ import {
   MONTHS,
   MONTHS_CARDINALITY,
   EXPENSE_CATEGORIES as CATEGORIES,
-  MONTHS_FROM_MS,
   MONTHS_TIMESPAN,
 } from "../common/constants";
 import {
@@ -254,14 +253,15 @@ const Expense = () => {
   const preCalculateChartData = (expenses, lastRates) => {
     const minimumDate = findMinimumDate(expenses);
     const startDate = minimumDate ? new Date(minimumDate) : new Date();
-    const currentDate = new Date();
-    const maxMonths = Math.floor((currentDate - startDate) / MONTHS_FROM_MS);
+    const today = new Date();
+    const months =
+      (today.getFullYear() - startDate.getFullYear()) * 12 +
+      (today.getMonth() - startDate.getMonth());
 
     const data = [];
-
     const initialYear = startDate.getFullYear();
     const initialMonth = startDate.getMonth();
-    for (let i = 0; i <= maxMonths; ++i) {
+    for (let i = 0; i <= months; ++i) {
       const year = initialYear + Math.floor(i / 12);
       const month = (initialMonth + i) % 12;
 

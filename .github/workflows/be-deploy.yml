@@ -23,5 +23,9 @@ jobs:
           script: |
             cd github/personal-finance-manager
             git pull origin main
+
             cd be/java-sb
-            mvn spring-boot:run
+            pkill -f "java -jar target/java-sb-0.0.1-SNAPSHOT.jar"
+
+            mvn clean package
+            nohup java -jar target/java-sb-0.0.1-SNAPSHOT.jar > console.log 2>&1 &

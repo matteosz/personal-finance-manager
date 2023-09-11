@@ -16,17 +16,7 @@ const Setup = () => {
   const { user: userData } = useSelector((state) => state.user);
   const { setup } = useSelector((state) => state.global);
 
-  const defEntry =
-    userData && userData.wallet
-      ? [
-          Object.entries(userData.wallet.keyPoints[userData.wallet.startDate])
-            .filter((entry) => entry[1] !== 0)
-            .map((entry) => {
-              return { amount: entry[1], currency: entry[0] };
-            }),
-          userData.wallet.startDate,
-        ]
-      : [[{ amount: "", currency: "" }], ""];
+  const defEntry = [[{ amount: "", currency: "" }], ""];
   const [entries, setEntries] = useState(defEntry[0]);
   const [startDate, setStartDate] = useState(defEntry[1]);
   const [loading, setLoading] = useState(false);

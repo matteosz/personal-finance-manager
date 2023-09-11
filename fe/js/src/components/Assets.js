@@ -400,7 +400,7 @@ const Asset = () => {
                   <Form.Control
                     as="textarea"
                     rows={1}
-                    name="identifier"
+                    name="identifierCode"
                     value={assetForm.identifierCode}
                     placeholder="Enter identifier code"
                     onChange={handleInputChange}

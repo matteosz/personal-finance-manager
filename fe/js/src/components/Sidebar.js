@@ -10,7 +10,7 @@ import { Currency, convertCurrency } from "../objects/Currency";
 import { FormattedDate } from "../objects/FormattedDate";
 import { logout } from "../actions/auth";
 import { setCurrency } from "../actions/currency";
-import { CURRENCIES, MONTHS_FROM_MS } from "../common/constants";
+import { CURRENCIES } from "../common/constants";
 import { setGlobalSetupState, setGlobalNetWorthState } from "../actions/global";
 
 const Navbar = styled.div`
@@ -153,17 +153,22 @@ const Sidebar = () => {
       return;
     }
     const startDate = new Date(userData.wallet.startDate);
-    const maxMonths = Math.floor((new Date() - startDate) / MONTHS_FROM_MS);
+    const today = new Date();
+    const months =
+      (today.getFullYear() - startDate.getFullYear()) * 12 +
+      (today.getMonth() - startDate.getMonth());
 
     const bucketedNetWorth = [];
     const initialYear = startDate.getFullYear();
     const initialMonth = startDate.getMonth();
-    for (let i = 0; i <= maxMonths; ++i) {
+    for (let i = 0; i <= months; ++i) {
       const year = initialYear + Math.floor(i / 12);
       const month = (initialMonth + i) % 12;
 
       const currentMonth = new Date(year, month);
       const formattedDate = FormattedDate(currentMonth);
+
+      debugger;
 
       const monthNetWorth = Object.entries(
         userData.wallet.keyPoints[formattedDate]

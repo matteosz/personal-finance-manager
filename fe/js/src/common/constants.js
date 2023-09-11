@@ -9,8 +9,6 @@ export const CURRENCIES = {
 // ------ //
 
 // Time related constants
-
-export const MONTHS_FROM_MS = 30 * 24 * 60 * 60 * 1000;
 export const MONTHS_TIMESPAN_NW = {
   "3M": 3,
   "6M": 6,
