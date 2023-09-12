@@ -11,6 +11,7 @@ const register = (username, email, password) => {
 };
 
 const login = (username, password) => {
+  console.log("url:" + API_URL + "signin");
   return axios
     .post(API_URL + "signin", {
       username,
