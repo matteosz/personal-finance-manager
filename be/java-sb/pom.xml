@@ -17,6 +17,17 @@
   <properties>
     <java.version>17</java.version>
   </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>com.pfm.sbjwt.SPSecurityJWTApp</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -88,13 +99,7 @@
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
-      <version>RELEASE</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>RELEASE</version>
+      <version>24.0.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
