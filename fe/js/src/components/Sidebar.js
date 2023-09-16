@@ -168,8 +168,6 @@ const Sidebar = () => {
       const currentMonth = new Date(year, month);
       const formattedDate = FormattedDate(currentMonth);
 
-      debugger;
-
       const monthNetWorth = Object.entries(
         userData.wallet.keyPoints[formattedDate]
       ).reduce((total, [currency, amount]) => {

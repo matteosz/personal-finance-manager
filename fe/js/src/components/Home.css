@@ -1,0 +1,121 @@
+body, h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.landing-header {
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  justify-content: right;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 999;  
+}
+
+.landing-buttons button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  margin: 0 10px;
+}
+
+.landing-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px #ccc;
+}
+
+.landing-content h1 {
+  font-size: 36px;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.landing-content p {
+  font-size: 18px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.password-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+.password-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px #ccc;
+}
+
+.password-form h3 {
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+.password-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.password-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+}
+/* Darken the carousel captions */
+.carousel-caption {
+  background-color: rgba(0, 0, 0, 0.7); /* Adjust the opacity as needed */
+  color: white; /* Text color for captions */
+  /* Add other styles as needed for caption positioning, padding, etc. */
+}
+
+/* Darken the carousel controls (prev and next buttons) */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.7); /* Adjust the opacity as needed */
+  color: white; /* Arrow color for controls */
+  /* Add other styles as needed for control positioning, padding, etc. */
+}
+
+/* Optional: Style the active indicator dot */
+.carousel-indicators .active {
+  background-color: #007bff; /* Change to your preferred color */
+  /* Add other styles as needed for indicator dot */
+}

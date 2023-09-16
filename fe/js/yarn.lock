@@ -2046,7 +2046,7 @@
     "schema-utils" "^3.0.0"
     "source-map" "^0.7.3"
 
-"@popperjs/core@^2.0.0", "@popperjs/core@^2.11.6", "@popperjs/core@^2.11.7", "@popperjs/core@^2.9.2":
+"@popperjs/core@^2.0.0", "@popperjs/core@^2.11.6", "@popperjs/core@^2.11.8", "@popperjs/core@^2.9.2":
   "integrity" "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A=="
   "resolved" "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
   "version" "2.11.8"
@@ -4095,10 +4095,10 @@
   "resolved" "https://registry.npmjs.org/boolbase/-/boolbase-1.0.0.tgz"
   "version" "1.0.0"
 
-"bootstrap@^5.3.0":
-  "integrity" "sha512-UnBV3E3v4STVNQdms6jSGO2CvOkjUMdDAVR2V5N4uCMdaIkaQjbcEAMqRimDHIs4uqBYzDAKCQwCB+97tJgHQw=="
-  "resolved" "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.0.tgz"
-  "version" "5.3.0"
+"bootstrap@^5.3.2":
+  "integrity" "sha512-D32nmNWiQHo94BKHLmOrdjlL05q1c8oxbtBphQFb9Z5to6eGRDCm0QgeaZ4zFBHzfg2++rqa2JkqCcxDy0sH0g=="
+  "resolved" "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.2.tgz"
+  "version" "5.3.2"
 
 "brace-expansion@^1.1.7":
   "integrity" "sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA=="
@@ -10679,7 +10679,7 @@
     "react-is" "^16.3.2"
     "warning" "^4.0.0"
 
-"prop-types@*", "prop-types@^15.6.0", "prop-types@^15.6.2", "prop-types@^15.7.2", "prop-types@^15.8.1":
+"prop-types@*", "prop-types@^15.5.8", "prop-types@^15.6.0", "prop-types@^15.6.2", "prop-types@^15.7.2", "prop-types@^15.8.1":
   "integrity" "sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg=="
   "resolved" "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   "version" "15.8.1"
@@ -10872,6 +10872,13 @@
     "loose-envify" "^1.1.0"
     "scheduler" "^0.23.0"
 
+"react-easy-swipe@^0.0.21":
+  "integrity" "sha512-OeR2jAxdoqUMHIn/nS9fgreI5hSpgGoL5ezdal4+oO7YSSgJR8ga+PkYGJrSrJ9MKlPcQjMQXnketrD7WNmNsg=="
+  "resolved" "https://registry.npmjs.org/react-easy-swipe/-/react-easy-swipe-0.0.21.tgz"
+  "version" "0.0.21"
+  dependencies:
+    "prop-types" "^15.5.8"
+
 "react-error-overlay@^6.0.11":
   "integrity" "sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg=="
   "resolved" "https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.11.tgz"
@@ -11053,6 +11060,15 @@
   "version" "8.1.0"
   dependencies:
     "lodash" "^4.17.21"
+
+"react-responsive-carousel@^3.2.23":
+  "integrity" "sha512-pqJLsBaKHWJhw/ItODgbVoziR2z4lpcJg+YwmRlSk4rKH32VE633mAtZZ9kDXjy4wFO+pgUZmDKPsPe1fPmHCg=="
+  "resolved" "https://registry.npmjs.org/react-responsive-carousel/-/react-responsive-carousel-3.2.23.tgz"
+  "version" "3.2.23"
+  dependencies:
+    "classnames" "^2.2.5"
+    "prop-types" "^15.5.8"
+    "react-easy-swipe" "^0.0.21"
 
 "react-router-dom@^6.14.1":
   "integrity" "sha512-ssF6M5UkQjHK70fgukCJyjlda0Dgono2QGwqGvuk7D+EDGHdacEN3Yke2LTMjkrpHuFwBfDFsEjGVXBDmL+bWw=="

@@ -2,7 +2,6 @@ import React, { useEffect, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import Login from "./components/Login";
@@ -13,6 +12,7 @@ import Expense from "./components/Expenses";
 import Income from "./components/Income";
 import Setup from "./components/Setup";
 import Assets from "./components/Assets";
+import Home from "./components/Home";
 
 import EventBus from "./common/EventBus";
 
@@ -26,6 +26,7 @@ const App = () => {
   const { setup } = useSelector((state) => state.global);
 
   const [userContentLoaded, setUserContentLoaded] = useState(false);
+  const [isPasswordCorrect, setisPasswordCorrect] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -60,6 +61,13 @@ const App = () => {
     };
   }, [logOut]);
 
+  useEffect(() => {
+    const storedPassword = localStorage.getItem("appPassword");
+    if (storedPassword) {
+      setisPasswordCorrect(true);
+    }
+  }, []);
+
   const setupOrElement = (element) => {
     if (currentUser && (setup || (userData && !userData.wallet))) {
       return <Setup />;
@@ -70,21 +78,26 @@ const App = () => {
 
   return (
     <div>
-      {currentUser && !setup && userData && userData.wallet && <Sidebar />}
+      {!isPasswordCorrect ? <Home /> : 
+        (
+        <div>
+          {currentUser && !setup && userData && userData.wallet && <Sidebar />}
+          <div className="container mt-3">
+          <Routes>  
+              <Route path="/" element={<Login />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/home" element={setupOrElement(<Dashboard />)} />
+              <Route path="/expenses" element={setupOrElement(<Expense />)} />
+              <Route path="/income" element={setupOrElement(<Income />)} />
+              <Route path="/assets" element={setupOrElement(<Assets />)} />
+          </Routes>
+          </div>
+        </div>
+        )
+      }
 
-      <div className="container mt-3">
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/home" element={setupOrElement(<Dashboard />)} />
-          <Route path="/expenses" element={setupOrElement(<Expense />)} />
-          <Route path="/income" element={setupOrElement(<Income />)} />
-          <Route path="/assets" element={setupOrElement(<Assets />)} />
-        </Routes>
-      </div>
     </div>
   );
 };
-
 export default App;

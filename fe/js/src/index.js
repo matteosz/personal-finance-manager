@@ -5,6 +5,7 @@ import store from "./store";
 import "./index.css";
 import App from "./App";
 import { GlobalStyle } from "./styles/global";
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 
 import { BrowserRouter } from "react-router-dom";
 
